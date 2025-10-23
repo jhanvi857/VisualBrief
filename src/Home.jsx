@@ -4,7 +4,7 @@ import FileUploadSection from "./components/File-upload";
 import SummaryPanel from "./components/SummaryPanel";
 import VisualPreview from "./components/VisualPreview";
 import ExportOptions from "./components/Export-options";
-import MermaidRenderer from "./components/MermaidRenderer";
+
 export default function Home() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -14,10 +14,9 @@ export default function Home() {
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isDiagramLoading, setIsDiagramLoading] = useState(false);
 
-  const BACKEND_URL = "http://localhost:3000"; 
+  const BACKEND_URL = "http://localhost:3000";
 
   const handleFileUpload = (file) => setUploadedFile(file);
-
   const handleGenerateSummary = async () => {
     if (!uploadedFile) return;
     setIsSummaryLoading(true);
@@ -33,7 +32,7 @@ export default function Home() {
       const data = await response.json();
 
       setSummary(data.summary);
-      setVisualData(data.diagram);
+      setVisualData(data.diagram); 
     } catch (err) {
       console.error("Summary generation failed:", err);
       setSummary({
@@ -45,17 +44,17 @@ export default function Home() {
     }
   };
 
-  // Generate diagram only (custom text)
-  const handleGenerateDiagram = async (type) => {
+  const handleGenerateCustomDiagram = async () => {
+    if (!diagramCode) return;
     setIsDiagramLoading(true);
     try {
       const response = await fetch(`${BACKEND_URL}/diagram`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ text: diagramCode, diagramType, isFile: false }),
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: diagramCode, diagramType }),
+      });
       const data = await response.json();
-      setVisualData(data.diagram);
+      setVisualData(data.diagram); 
     } catch (err) {
       console.error("Diagram generation failed:", err);
     } finally {
@@ -78,7 +77,7 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Inputs: File Upload + Custom Diagram */}
+      {/* Inputs */}
       <div className="flex flex-col lg:flex-row gap-8 mb-8">
         {/* File Input */}
         <div className="flex-1 flex flex-col space-y-4">
@@ -89,7 +88,7 @@ export default function Home() {
               <button
                 onClick={handleGenerateSummary}
                 disabled={isSummaryLoading}
-                className="w-full py-3 px-6 bg-linear-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-indigo-500/50"
+                className="w-full py-3 px-6 bg-linear-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg flex items-center justify-center gap-2"
               >
                 {isSummaryLoading ? (
                   <>
@@ -97,23 +96,7 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <Zap className="w-5 h-5" /> Generate Summary
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={() => handleGenerateDiagram("file")}
-                disabled={isDiagramLoading}
-                className="w-full py-3 px-6 bg-linear-to-br from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/50"
-              >
-                {isDiagramLoading ? (
-                  <>
-                    <Loader className="w-5 h-5 animate-spin" /> Generating Diagram...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5" /> Generate Diagram from File
+                    <Zap className="w-5 h-5" /> Generate Summary & Diagram
                   </>
                 )}
               </button>
@@ -144,9 +127,9 @@ export default function Home() {
               placeholder="Type your steps or description here..."
             />
             <button
-              onClick={() => handleGenerateDiagram("custom")}
+              onClick={handleGenerateCustomDiagram}
               disabled={isDiagramLoading}
-              className="w-full py-3 px-6 bg-linear-to-br from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/50"
+              className="w-full py-3 px-6 bg-linear-to-br from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg flex items-center justify-center gap-2"
             >
               {isDiagramLoading ? (
                 <>
@@ -166,13 +149,7 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-slate-800 p-4 rounded-2xl shadow-md flex flex-col gap-4">
           <h2 className="text-white text-xl font-semibold">Diagram Preview</h2>
-          <div className="bg-slate-900 p-2 rounded-lg min-h-[250px] overflow-auto">
-  {visualData?.mermaid ? (
-    <MermaidRenderer chart={visualData.mermaid} />
-  ) : (
-    <p className="text-slate-400">Diagram will appear here</p>
-  )}
-</div>
+          <VisualPreview diagramData={visualData} />
         </div>
 
         {summary && (

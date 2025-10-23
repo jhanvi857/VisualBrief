@@ -1,32 +1,46 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import mermaid from "mermaid";
 
-mermaid.initialize({
-  startOnLoad: false, 
-  theme: "default",
-});
-
 export default function MermaidRenderer({ chart }) {
-  const container = useRef(null);
-  const [error, setError] = useState(false);
+  const containerRef = useRef(null);
+  
+  const renderId = useRef("mermaid-render-" + Math.floor(Math.random() * 10000)).current;
 
   useEffect(() => {
-    if (!chart || !container.current) return;
-
-    setError(false);
-    const renderId = `mermaid-${Math.floor(Math.random() * 10000)}`;
-    
-    mermaid.render(renderId, chart, (svgCode) => {
-      if (container.current) container.current.innerHTML = svgCode;
-    }).catch((err) => {
-      console.error("Mermaid render error:", err);
-      setError(true);
+    if (!chart || !containerRef.current) return;
+    let isMounted = true; 
+    containerRef.current.innerHTML = "";
+        mermaid.initialize({ 
+        startOnLoad: false, 
+        theme: 'default' 
     });
-  }, [chart]);
+    
+    mermaid.render(renderId, chart)
+        .then(({ svg }) => {
+            if (isMounted && containerRef.current) {
+                containerRef.current.innerHTML = svg; 
+            }
+        })
+        .catch((err) => {
+           if (isMounted && containerRef.current) {
+              console.error("Mermaid render error:", err);
+              containerRef.current.innerHTML =
+                "<p class='text-red-500'>Invalid diagram code or rendering failed.</p>";
+           }
+        });
+    
+    return () => {
+      isMounted = false;
+    };
 
-  if (!chart) return <p className="text-slate-400">Diagram will appear here</p>;
-  if (error) return <p className="text-red-400">Failed to render diagram</p>;
+  }, [chart, renderId]); 
 
-  return <div ref={container}></div>;
+  return (
+    <div
+      ref={containerRef}
+      className="w-full overflow-auto bg-gray-50 p-4 rounded-xl shadow-inner min-h-[200px]"
+    >
+      {!chart && <p className="text-gray-500">No diagram to render</p>}
+    </div>
+  );
 }

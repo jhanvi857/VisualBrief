@@ -1,24 +1,12 @@
-import { useEffect, useRef } from "react";
-import mermaid from "mermaid";
+import MermaidRenderer from "./MermaidRenderer";
 
-export default function VisualPreview({ data }) {
-  const mermaidRef = useRef(null);
+export default function VisualPreview({ diagramData }) {
+  if (!diagramData) return null;
 
-  useEffect(() => {
-    if (!data?.mermaid || !mermaidRef.current) return;
-
-    mermaid.initialize({ startOnLoad: false, theme: "forest" });
-
-    mermaidRef.current.innerHTML = "";
-
-    try {
-      mermaid.render("mermaid-diagram", data.mermaid, (svgCode) => {
-        mermaidRef.current.innerHTML = svgCode;
-      });
-    } catch (err) {
-      console.error("Mermaid render error:", err);
-    }
-  }, [data]);
-
-  return <div ref={mermaidRef} className="min-h-[300px] w-full"></div>;
+  return (
+    <div className="my-6">
+      <h2 className="text-xl font-semibold mb-3 text-white">Generated Diagram</h2>
+      <MermaidRenderer chart={diagramData.mermaid || ""} />
+    </div>
+  );
 }

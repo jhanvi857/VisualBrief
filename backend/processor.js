@@ -1,9 +1,7 @@
 const { PythonShell } = require("python-shell");
 const path = require("path");
-
-const ML_PATH = path.join(__dirname, "../ML"); 
-
-// Generic function to run Python script
+const ML_PATH = path.join(__dirname, "../ML");
+//func. to run python via node..
 function runPython(mode, args = [], inputText = null) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -13,38 +11,41 @@ function runPython(mode, args = [], inputText = null) {
     };
 
     const pyshell = new PythonShell("processor.py", options);
-    let output = [];
-
-    pyshell.on("message", (msg) => output.push(msg));
-    pyshell.on("error", (err) => reject(err));
+    let output = "";
+    pyshell.on("message", (msg) => (output += msg));
     pyshell.on("stderr", (err) => console.error("Python STDERR:", err));
-    pyshell.on("close", () => resolve(output.join("\n")));
-
+    pyshell.end((err) => {
+      if (err) return reject(err);
+      try {
+        resolve(JSON.parse(output));
+      } catch (e) {
+        reject("Failed to parse Python output: " + e);
+      }
+    });
     if (inputText) {
       pyshell.send(inputText);
-      pyshell.end(); 
+      pyshell.end();
     }
   });
 }
 
-async function parseFile(filePath) {
-  return runPython("parse", [filePath]);
-}
-
+// passing summ. to ML..
 async function generateSummary(filePath) {
-  const text = await parseFile(filePath);
-  const output = await runPython("summary", [], text);
-  return JSON.parse(output);
+  return await runPython("summary", [filePath]);
 }
 
-async function generateDiagram(input, diagramType = "flowchart", isFile = true) {
-  let output;
-  if (isFile) {
-    output = await runPython("diagram", [input, diagramType]);
-  } else {
-    output = await runPython("diagram", ["-t", diagramType], input);
-  }
-  return JSON.parse(output);
+// passing diag to ML..
+async function generateDiagramFromFile(filePath, diagramType = "flowchart") {
+  return await runPython("diagram", [filePath, diagramType]);
 }
 
-module.exports = { parseFile, generateSummary, generateDiagram };
+// sep. from text to diag. from converting text into valid mermaid inpuyt..
+async function generateDiagramFromText(text, diagramType = "flowchart") {
+  return await runPython("diagram", ["-t", text, diagramType]);
+}
+
+module.exports = {
+  generateSummary,
+  generateDiagramFromFile,
+  generateDiagramFromText,
+};
