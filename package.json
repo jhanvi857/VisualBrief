@@ -14,6 +14,7 @@
     "lucide-react": "^0.546.0",
     "mermaid": "^11.12.0",
     "react": "^19.1.1",
+    "react-cytoscapejs": "^2.0.0",
     "react-dom": "^19.1.1",
     "react-mermaid2": "^0.1.4",
     "tailwindcss": "^4.1.15"

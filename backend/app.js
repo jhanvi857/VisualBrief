@@ -27,9 +27,9 @@ const upload = multer({ storage });
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded." });
-
+    const diagramType = req.body.diagramType || "flowchart";
     const summary = await generateSummary(req.file.path);
-    const diagram = await generateDiagramFromFile(req.file.path);
+    const diagram = await generateDiagramFromFile(req.file.path,diagramType);
 
     res.json({ summary, diagram });
   } catch (err) {

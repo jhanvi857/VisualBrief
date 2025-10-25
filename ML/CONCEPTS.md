@@ -50,20 +50,33 @@ Logic:
 ### Steps:
 
 1. Extract entities & relations with SpaCy:
+```bash
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
-nsubj : subject
+doc = nlp(text)
+entities = set()
+relations = []
 
-dobj : object
+for chunk in doc.noun_chunks:
+    entities.add(chunk.text.strip())
 
-VERB : relation
-Example: "AI improves learning" = (AI, improve, learning)
+for token in doc:
+    if token.pos_ == "VERB":
+        subjects = [child for child in token.children if child.dep_ in ["nsubj", "nsubjpass"]]
+        objects = [child for child in token.children if child.dep_ in ["dobj", "pobj"]]
+        for subj in subjects:
+            for obj in objects:
+                relations.append((subj.text, token.lemma_, obj.text))
+```
 
 2. Build nodes and edges:
 ```bash
-nodes = [{"id": 1, "label": "AI"},
-         {"id": 2, "label": "Learning"}
-        ]
-edges = [{"from": 1, "to": 2, "label": "improve"}]
+nodes = [{"id": i, "label": entity} for i, entity in enumerate(entities)]
+edges = [{"from": nodes.index(next(n for n in nodes if n["label"]==subj)),
+          "to": nodes.index(next(n for n in nodes if n["label"]==obj)),
+          "label": verb
+         } for subj, verb, obj in relations]
 ```
 
 3. Convert to Mermaid.js format:
@@ -80,7 +93,7 @@ Output: JSON with nodes, edges, mermaid.
 
 ### Usage:
 
-- python processor.py parse <file> : just parse
+- python processor.py parse <file> : parse file
 
 - python processor.py summary <file> : generate summary
 

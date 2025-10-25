@@ -10,7 +10,7 @@ export default function Home() {
   const [summary, setSummary] = useState(null);
   const [visualData, setVisualData] = useState(null);
   const [diagramType, setDiagramType] = useState("flowchart");
-  const [diagramCode, setDiagramCode] = useState("Enter description in your words..");
+  const [diagramCode, setDiagramCode] = useState("");
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isDiagramLoading, setIsDiagramLoading] = useState(false);
 
@@ -23,6 +23,7 @@ export default function Home() {
 
     const formData = new FormData();
     formData.append("file", uploadedFile);
+    formData.append("diagramType", diagramType);
 
     try {
       const response = await fetch(`${BACKEND_URL}/upload`, {
@@ -32,7 +33,7 @@ export default function Home() {
       const data = await response.json();
 
       setSummary(data.summary);
-      setVisualData(data.diagram); 
+      setVisualData(data.diagram);
     } catch (err) {
       console.error("Summary generation failed:", err);
       setSummary({
@@ -54,7 +55,7 @@ export default function Home() {
         body: JSON.stringify({ text: diagramCode, diagramType }),
       });
       const data = await response.json();
-      setVisualData(data.diagram); 
+      setVisualData(data.diagram);
     } catch (err) {
       console.error("Diagram generation failed:", err);
     } finally {
@@ -70,54 +71,81 @@ export default function Home() {
           <div className="p-2 bg-indigo-500/20 rounded-lg">
             <Zap className="w-8 h-8 text-indigo-400" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white">VisualBrief</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">
+            VisualBrief
+          </h1>
         </div>
         <p className="text-lg text-slate-400">
-          Upload documents or input text to generate intelligent summaries and diagrams.
+          Upload documents or input text to generate intelligent summaries and
+          diagrams.
         </p>
       </div>
 
       {/* Inputs */}
       <div className="flex flex-col lg:flex-row gap-8 mb-8">
-        {/* File Input */}
         <div className="flex-1 flex flex-col space-y-4">
           <h2 className="text-white text-xl font-semibold mb-2">File Input</h2>
-          <FileUploadSection onFileUpload={handleFileUpload} uploadedFile={uploadedFile} />
+          <FileUploadSection
+            onFileUpload={handleFileUpload}
+            uploadedFile={uploadedFile}
+          />
+
+          {/* Diagram Type Selector */}
+          <div className="flex items-center gap-4 mt-2">
+            <label className="text-white font-semibold">Diagram Type:</label>
+            <select
+              value={diagramType}
+              onChange={(e) => setDiagramType(e.target.value)}
+              className="bg-slate-900 text-white rounded-lg p-2"
+            >
+              <option value="flowchart">Flowchart</option>
+              <option value="erDiagram">ER Diagram</option>
+              <option value="conceptMap">Concept Map</option>
+            </select>
+          </div>
+
           {uploadedFile && (
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={handleGenerateSummary}
-                disabled={isSummaryLoading}
-                className="w-full py-3 px-6 bg-linear-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg flex items-center justify-center gap-2"
-              >
-                {isSummaryLoading ? (
-                  <>
-                    <Loader className="w-5 h-5 animate-spin" /> Generating Summary...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5" /> Generate Summary & Diagram
-                  </>
-                )}
-              </button>
-            </div>
+            <button
+              onClick={handleGenerateSummary}
+              disabled={isSummaryLoading}
+              className="w-full py-3 px-6 bg-linear-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg flex items-center justify-center gap-2 mt-4"
+            >
+              {isSummaryLoading ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" /> Generating Summary
+                  & Diagram..
+                </>
+              ) : (
+                <>
+                  <Zap className="w-5 h-5" /> Generate Summary & Diagram
+                </>
+              )}
+            </button>
           )}
         </div>
 
         {/* Custom Diagram Input */}
         <div className="flex-1 flex flex-col space-y-4">
-          <h2 className="text-white text-xl font-semibold mb-2">Custom Diagram / Steps</h2>
+          <h2 className="text-white text-xl font-semibold mb-2">
+            Custom Diagram / Steps
+          </h2>
           <div className="bg-slate-800 p-4 rounded-2xl shadow-md flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <label className="text-white font-semibold">Diagram Type</label>
               <select
                 value={diagramType}
                 onChange={(e) => setDiagramType(e.target.value)}
-                className="bg-slate-700 text-white px-2 py-1 rounded"
+                className="text-white py-2 rounded-lg px-2 bg-slate-900"
               >
-                <option value="flowchart">Flowchart</option>
-                <option value="er">ER Diagram</option>
-                <option value="sequence">Sequence Diagram</option>
+                <option value="flowchart" className="text-white">
+                  Flowchart
+                </option>
+                <option value="erDiagram" className="text-white">
+                  ER Diagram
+                </option>
+                <option value="conceptMap" className="text-white">
+                  Concept Map
+                </option>
               </select>
             </div>
             <textarea
@@ -133,7 +161,8 @@ export default function Home() {
             >
               {isDiagramLoading ? (
                 <>
-                  <Loader className="w-5 h-5 animate-spin" /> Generating Diagram...
+                  <Loader className="w-5 h-5 animate-spin" /> Generating
+                  Diagram...
                 </>
               ) : (
                 <>
