@@ -1,6 +1,6 @@
 const { PythonShell } = require("python-shell");
 const path = require("path");
-const ML_PATH = path.join(__dirname, "../ML");
+const ML_PATH = path.join(__dirname, "./ML");
 //func. to run python via node..
 function runPython(mode, args = [], inputText = null) {
   return new Promise((resolve, reject) => {

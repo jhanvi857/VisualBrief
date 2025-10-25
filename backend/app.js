@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 const {
   generateSummary,
   generateDiagramFromFile,
@@ -31,9 +32,20 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const summary = await generateSummary(req.file.path);
     const diagram = await generateDiagramFromFile(req.file.path,diagramType);
 
+    const filePath = path.resolve(req.file.path); 
+    fs.unlink(filePath, (err) => {
+      if (err) console.error("Failed to delete uploaded file:", err);
+      else console.log("Deleted uploaded file:",filePath);
+    });
+
     res.json({ summary, diagram });
   } catch (err) {
     console.error("Error in /upload:", err);
+    if (req.file?.path) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error("Failed to delete uploaded file on error:", err);
+      });
+    }
     res.status(500).json({ error: "Failed to process file" });
   }
 });
