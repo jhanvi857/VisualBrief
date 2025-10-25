@@ -32,6 +32,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const summary = await generateSummary(req.file.path);
     const diagram = await generateDiagramFromFile(req.file.path,diagramType);
 
+    // adding file delition after processing file..
     const filePath = path.resolve(req.file.path); 
     fs.unlink(filePath, (err) => {
       if (err) console.error("Failed to delete uploaded file:", err);
