@@ -1,9 +1,9 @@
-# VisualBrief : ML 
+# VisualBrief : ML CONCEPTS 
 ### This module handles text parsing, summarization, and diagram generation. It uses Python and popular NLP libraries to convert raw documents into structured information.
 
 # 1. File Parsing (parse_file)
 
-## Purpose: Convert uploaded documents (PDF, DOCX, TXT) into plain text.
+### purpose: Convert uploaded documents (PDF, DOCX, TXT) into plain text.
 
 ### Libraries:
 
@@ -26,26 +26,59 @@ else:
 
 # 2. Summary Generation (generate_summary)
 
-## Purpose: Create a short extractive summary from document text.
+### purpose: Create a short extractive summary from the document text by picking the most important sentences, instead of just taking the first few sentences. This ensures that the summary covers the main topics, key entities, and important ideas in the document.
 
-### Library: nltk → sent_tokenize splits text into sentences.
+### Library: NLTK:
+- sent_tokenize → splits text into sentences.
+- word_tokenize → splits sentences into words.
+- stopwords → helps ignore common words like “the”, “is”, “and”.
 
 Logic:
 
-- Split text into sentences.
+- Split the document into sentences using sent_tokenize.
+- Flatten all words from the document, filter out stopwords and non-alphabetic words.
+- Count word frequencies to understand which words are important.
+- Score each sentence by summing the frequencies of words in that sentence.
+- Pick top n sentences with the highest scores (default n=5).
+- Combine selected sentences to form the summary.
 
-- Take first n sentences (default 5) as summary.
+## code snippet : 
+```bash
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from collections import Counter
+import nltk
 
-- Output Format (JSON):
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
+
+def generate_summary(text, n=5):
+    stop_words = set(stopwords.words('english'))
+    sentences = sent_tokenize(text)
+    words = [word.lower() for word in word_tokenize(text) 
+             if word.isalpha() and word.lower() not in stop_words]
+    freq = Counter(words)
+    
+    sentence_scores = {}
+    for sent in sentences:
+        sent_words = [w.lower() for w in word_tokenize(sent) if w.isalpha()]
+        sentence_scores[sent] = sum(freq.get(w, 0) for w in sent_words)
+    
+    top_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:n]
+    summary = " ".join(top_sentences)
+    
+    return {"title": "Document Summary", "content": summary}
+```
+### Output Format (JSON):
 ```bash
 {
   "title": "Document Summary",
-  "content": "First 5 sentences..."
+  "content": "Most important sentences from the text..."
 }
 ```
 
 # 3. Diagram Generation (generate_diagram)
-## Purpose: Convert text into structured diagrams.
+### purpose: Convert text into structured diagrams.
 
 ### Steps:
 
@@ -89,7 +122,7 @@ Output: JSON with nodes, edges, mermaid.
 
 # 4. ML Processor (processor.py)
 
-## Purpose: Acts as a single entry point for Node.js.
+### purpose: Acts as a single entry point for Node.js.
 
 ### Usage:
 
