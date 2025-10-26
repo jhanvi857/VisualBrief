@@ -2,8 +2,16 @@ import sys
 import json
 import io
 import nltk
+import contextlib
 from ML_module import parse_file, generate_summary, generate_diagram
-nltk.data.path.append("/opt/render/nltk_data")
+
+for pkg in ["punkt", "punkt_tab"]:
+    try:
+        nltk.data.find(f"tokenizers/{pkg}")
+    except LookupError:
+        with open(io.devnull, "w") as f, contextlib.redirect_stdout(f), contextlib.redirect_stderr(f):
+            nltk.download(pkg, quiet=True)
+
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 mode = sys.argv[1]
 diagram_type = "flowchart"
