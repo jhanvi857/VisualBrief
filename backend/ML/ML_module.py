@@ -237,7 +237,7 @@ def create_safe_id(name):
     safe = re.sub(r'[^a-zA-Z0-9_]', '_', name.strip().lower())
     if not re.match(r'^[a-zA-Z]', safe):
         safe = "C_" + safe
-    return safe[:30] # Limit length
+    return safe[:30] 
 
 def generate_diagram(text, diagram_type="erDiagram"):
     result = {"nodes": [], "edges": [], "mermaid": ""}
@@ -276,191 +276,263 @@ def generate_diagram(text, diagram_type="erDiagram"):
         }
 
     elif diagram_type == "flowchart":
-        
-        steps = sent_tokenize(text)
-        steps = [s.strip() for s in steps if s.strip()]
+        import re
+        raw_steps = [s.strip() for s in re.split(r'[\n;]+', text) if s.strip()]
 
-        if not steps:
-            return {"nodes": [], "edges": [], "mermaid": "flowchart TD\n  N1[\"No steps found\"]"}
-
-        nodes_data = [] 
-        node_id_map = {}
+        nodes_data = []
+        edges = []
+        node_map = {}
         node_counter = 1
-        edges = [] 
-        pending_edges = []
-        
-        def get_or_create_node(label, shape="[]"):
+
+        def get_node(label, shape="[]"):
             nonlocal node_counter
-            label = label.strip()
-            if label not in node_id_map:
+            label = " ".join(label.split())  
+            if not label:
+                label = " "
+            if label not in node_map:
                 node_id = f"N{node_counter}"
-                node_id_map[label] = node_id
-                nodes_data.append((node_id, label, shape))
                 node_counter += 1
-            return node_id_map[label]
+                node_map[label] = node_id
+                nodes_data.append((node_id, label, shape))
+            return node_map[label]
 
-        i = 0
-        prev_node_id = None
-        
-        if not steps[0].lower().startswith("start") and not steps[0].lower().startswith("begin"):
-            start_id = get_or_create_node("START", "()")
-            prev_node_id = start_id
+        prev_node = None
+        pending_no = None  
 
-        while i < len(steps):
-            step_text = steps[i]
-            lower_text = step_text.lower()
-            current_id = None
+        start_id = get_node("Start", "()")
+        prev_node = start_id
 
-            match = re.match(r'if (.+?),\s*(.+)', lower_text, re.I)
-            if match:
-                condition = match.group(1).strip().capitalize()
-                yes_action_text = match.group(2).strip().capitalize()
+        for i, step in enumerate(raw_steps):
+            s = step.strip()
 
-                decision_id = get_or_create_node(f"If {condition}?", "{}")
+            if "?" in s:
+                cond_part, after = s.split("?", 1)
+                decision_text = cond_part.strip().capitalize()
+                decision_id = get_node(f"If {decision_text}?", "{}")
+                if prev_node:
+                    edges.append((prev_node, decision_id, ""))
+                prev_node = decision_id
 
-                if prev_node_id:
-                    edges.append((prev_node_id, decision_id, ""))
-                
-                # conditions : yes..
-                yes_id = get_or_create_node(yes_action_text, "[]")
-                edges.append((decision_id, yes_id, "Yes"))
-                
-                # else cond.. 
-                no_match = re.search(r'(?:otherwise|else),?\s*(.+)', lower_text, re.I)
-                
-                if no_match:
-                    no_action_text = no_match.group(1).strip().capitalize()
-                    no_id = get_or_create_node(no_action_text, "[]")
-                    edges.append((decision_id, no_id, "No"))
-                    
-                    pending_edges.append(yes_id)
-                    pending_edges.append(no_id)
-                else:
-                    pending_edges.append(yes_id)
-                    edges.append((decision_id, None, "No")) 
-                
-                prev_node_id = None 
-                i += 1
+                yes_match = re.search(r'if yes (.+?)(?:$|;|,)', after, re.I)
+                if yes_match:
+                    yes_text = yes_match.group(1).strip().capitalize()
+                    yes_id = get_node(yes_text)
+                    edges.append((decision_id, yes_id, "Yes"))
+                    prev_node = yes_id
+                pending_no = decision_id
                 continue
 
-            if any(term in lower_text for term in ["start", "begin"]):
-                shape = "()"
-            elif any(term in lower_text for term in ["end", "finish", "terminate", "stop"]):
-                shape = "()"
+            m_arrow = re.match(r'if\s+(.+?)\s*(?:->|then)\s*(.+?)\s*(?:else\s*(.+))?$', s, re.I)
+            if m_arrow:
+                cond_text = m_arrow.group(1).strip().capitalize()
+                yes_text = m_arrow.group(2).strip().capitalize()
+                no_text = m_arrow.group(3).strip().capitalize() if m_arrow.group(3) else None
+
+                decision_id = get_node(f"If {cond_text}?", "{}")  
+                yes_id = get_node(yes_text)
+                edges.append((prev_node, decision_id, ""))
+                edges.append((decision_id, yes_id, "Yes"))
+
+                if no_text:
+                    no_id = get_node(no_text)
+                    edges.append((decision_id, no_id, "No"))
+                else:
+                    pending_no = decision_id  
+
+                prev_node = yes_id
+                continue
+
+            m_inline = re.match(r'if\s+(.+?)\s+(print .+?)\s+else\s+(print .+)', s, re.I)
+            if m_inline:
+                cond_text = m_inline.group(1).strip().capitalize()
+                yes_text = m_inline.group(2).strip().capitalize()
+                no_text = m_inline.group(3).strip().capitalize()
+
+                decision_id = get_node(f"If {cond_text}?", "{}")
+                yes_id = get_node(yes_text)
+                no_id = get_node(no_text)
+
+                if prev_node:
+                    edges.append((prev_node, decision_id, ""))
+                edges.append((decision_id, yes_id, "Yes"))
+                edges.append((decision_id, no_id, "No"))
+
+                prev_node = yes_id
+                continue
+
+            m_else = re.match(r'^(?:else|otherwise)\s*(?:->|:)?\s*(.+)$', s, re.I)
+            if m_else and pending_no:
+                no_text = m_else.group(1).strip().capitalize()
+                no_id = get_node(no_text)
+                edges.append((pending_no, no_id, "No"))
+                pending_no = None
+                continue
+            
+            lower = s.lower()
+            if any(w in lower for w in ["start", "begin"]):
+                cur_id = start_id
+            elif any(w in lower for w in ["end", "stop", "finish", "terminate"]):
+                cur_id = get_node("End", "()")
             else:
-                shape = "[]"
+                cur_id = get_node(s.capitalize(), "[]")
 
-            current_id = get_or_create_node(step_text, shape)
-            
-            if pending_edges:
-                decision_id_for_no = None
-                
-                for src, dst, label in list(edges): 
-                    if dst is None and label == "No":
-                         decision_id_for_no = src
-                         edges.remove((src, dst, label))
-                         edges.append((src, current_id, "No"))
-                         break
-                         
-                for source_id in pending_edges:
-                    if source_id != decision_id_for_no: 
-                        edges.append((source_id, current_id, ""))
-                pending_edges = []
-            
-            elif prev_node_id:
-                edges.append((prev_node_id, current_id, ""))
+            if prev_node and prev_node != cur_id:
+                edges.append((prev_node, cur_id, ""))
+            prev_node = cur_id
 
-            prev_node_id = current_id
-            i += 1
-            
-        # generating mermaid flowchart diag..
+        if not any("end" in n[1].lower() for n in nodes_data):
+            end_id = get_node("End", "()")
+            if prev_node:
+                edges.append((prev_node, end_id, ""))
+
         mermaid = "flowchart TD\n"
-        final_edges = []
-        for idx, lbl, shape in nodes_data:
-            safe_lbl = lbl.replace('\\', '\\\\').replace('"', '\"').replace('\n', ' ')
-            
+        for nid, label, shape in nodes_data:
+            safe_lbl = label.replace('"', "'")
             if shape == "()":
-                mermaid += f"  {idx}(\"{safe_lbl}\")\n"
+                mermaid += f"  {nid}(\"{safe_lbl}\")\n"
             elif shape == "{}":
-                mermaid += f"  {idx}{{\"{safe_lbl}\"}}\n" 
+                mermaid += f"  {nid}{{\"{safe_lbl}\"}}\n"
             else:
-                mermaid += f"  {idx}[\"{safe_lbl}\"]\n"
+                mermaid += f"  {nid}[\"{safe_lbl}\"]\n"
 
-        for src, dst, label in edges:
+        for src, dst, lbl in edges:
             if src and dst:
-                final_edges.append((src, dst, label))
-                safe_label = label.replace('\\', '\\\\').replace('"', '\"').replace('\n', ' ')
-                arrow = f" -->|{safe_label}| " if safe_label else " --> "
+                arrow = f" -->|{lbl}| " if lbl else " --> "
                 mermaid += f"  {src}{arrow}{dst}\n"
 
         return {
-            "nodes": [{"id": idx, "label": lbl} for idx, lbl, _ in nodes_data],
-            "edges": [{"from": src, "to": dst, "label": lbl} for src, dst, lbl in final_edges],
+            "nodes": [{"id": nid, "label": lbl} for nid, lbl, _ in nodes_data],
+            "edges": [{"from": s, "to": d, "label": lbl} for s, d, lbl in edges if d],
             "mermaid": mermaid
         }
 
     elif diagram_type == "conceptMap":
-        
-        sentences = sent_tokenize(text)
         nodes = []
         edges = []
+        node_map = {}
+        node_counter = 1
+        unique_edges = set() 
 
-        for i, sent in enumerate(sentences):
-            node_id = f"N{i+1}"
-            nodes.append({"id": node_id, "label": sent.strip()})
-            if i > 0:
-                edges.append({"from": f"N{i}", "to": node_id, "label": ""})
+        def get_node(label):
+            nonlocal node_counter
+            label = label.strip()
+            if not label:
+                return None 
+            if label not in node_map:
+                node_id = f"N{node_counter}"
+                node_counter += 1
+                node_map[label] = node_id
+                nodes.append({"id": node_id, "label": label})
+            return node_map[label]
 
-        sub_nodes_map = {}
-        sub_counter = 1
-        for i, sent in enumerate(sentences):
-            doc = nlp(sent)
-            for chunk in doc.noun_chunks:
-                sub_label = chunk.text.strip()
-                if sub_label and sub_label != sent:
-                    sub_id_key = (sub_label, i+1) 
-                    if sub_id_key not in sub_nodes_map:
-                        sub_id = f"S{sub_counter}"
-                        sub_nodes_map[sub_id_key] = {"id": sub_id, "label": sub_label}
-                        edges.append({"from": f"N{i+1}", "to": sub_id, "label": "contains"}) 
-                        sub_counter += 1
+        segments = [s.strip() for s in text.split(';') if s.strip()]
 
-        for data in sub_nodes_map.values():
-            nodes.append(data)
+        nlp_segments = [] 
 
-        # Making mermaid diag..
+        for segment in segments:
+            if '->' in segment:
+                try:
+                    subject_phrase, object_phrase = [p.strip() for p in segment.split('->', 1)]
+                    
+                    relation = "includes" 
+                    
+                    objects_list = [o.strip() for o in object_phrase.split(',')]
+                    
+                    s_id = get_node(subject_phrase)
+
+                    for obj in objects_list:
+                        if obj:
+                            o_id = get_node(obj)
+                            if s_id and o_id:
+                                edge_tuple = (s_id, o_id, relation)
+                                if edge_tuple not in unique_edges:
+                                    unique_edges.add(edge_tuple)
+                                    edges.append({"from": s_id, "to": o_id, "label": relation})
+                except ValueError:
+                    nlp_segments.append(segment)
+            else:
+                nlp_segments.append(segment)
+                
+        nlp_text = ". ".join(nlp_segments)
+        if not nlp_text:
+            pass
+        else:
+            doc = nlp(nlp_text)
+
+            for sent in doc.sents:
+                for token in sent:
+                    if token.pos_ == "VERB":
+                        verb_token = token
+                        subjects = []
+                        objects = []
+                        for child in verb_token.lefts:
+                            if child.dep_ in ("nsubj", "nsubjpass"):
+                                start_index = child.i 
+                                end_index = list(child.subtree)[-1].i + 1
+                                subject_span = doc[start_index:end_index] 
+                                subjects.append(subject_span.text.strip()) 
+                        
+                        for child in verb_token.rights:
+                            if child.dep_ in ("dobj", "attr", "oprd"): 
+                                start_index = child.i 
+                                end_index = list(child.subtree)[-1].i + 1
+                                object_span = doc[start_index:end_index]
+                                objects.append(object_span.text.strip())
+                            
+                            elif child.dep_ == "prep": 
+                                pobj = [w for w in child.rights if w.dep_ == "pobj"]
+                                if pobj:
+                                    pobj_token = pobj[0]
+                                    start_index = pobj_token.i 
+                                    end_index = list(pobj_token.subtree)[-1].i + 1
+                                    object_span = doc[start_index:end_index]
+                                    objects.append(object_span.text.strip())
+                            
+                            elif child.dep_ in ("advcl", "xcomp"): 
+                                inf_verb = child 
+                                inf_objects = []
+                                for inf_child in inf_verb.rights:
+                                    if inf_child.dep_ in ("dobj", "attr"):
+                                        start_index = inf_child.i 
+                                        end_index = list(inf_child.subtree)[-1].i + 1
+                                        object_span = doc[start_index:end_index]
+                                        inf_objects.append(object_span.text.strip())
+
+                                if subjects and inf_objects:
+                                    for s in subjects:
+                                        for o in inf_objects:
+                                            s_id = get_node(s)
+                                            o_id = get_node(o)
+                                            relation_lemma = inf_verb.lemma_ 
+                                            edge_tuple = (s_id, o_id, relation_lemma)
+                                            if edge_tuple not in unique_edges:
+                                                unique_edges.add(edge_tuple)
+                                                edges.append({"from": s_id, "to": o_id, "label": relation_lemma})
+                                continue
+                        
+                        for s in subjects:
+                            for o in objects:
+                                s_id = get_node(s)
+                                o_id = get_node(o)
+                                relation_lemma = verb_token.lemma_
+                                edge_tuple = (s_id, o_id, relation_lemma)
+                                if edge_tuple not in unique_edges:
+                                    unique_edges.add(edge_tuple)
+                                    edges.append({"from": s_id, "to": o_id, "label": relation_lemma})
+
+
         mermaid = "graph TD\n"
         for node in nodes:
-            safe_label = node["label"].replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+            safe_label = node["label"].replace('"', "'")
             mermaid += f'  {node["id"]}[{safe_label}]\n'
-            
         for edge in edges:
             lbl = edge.get("label", "")
-            safe_lbl = lbl.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
-            arrow = f" -->|{safe_lbl}| " if safe_lbl else " --> "
+            arrow = f" -->|{lbl}| " if lbl else " --> "
             mermaid += f'  {edge["from"]}{arrow}{edge["to"]}\n'
 
-        result["nodes"] = nodes
-        result["edges"] = edges
-        result["mermaid"] = mermaid
-        return result
-
+        return {
+            "nodes": nodes,
+            "edges": edges,
+            "mermaid": mermaid
+        }
     return result
-
-if __name__ == "__main__":
-    # testing..
-    text = """
-    The financial institution's risk assessment department evaluates loan applications, which are submitted by clients, before the approval process is finalized by the board of directors. Artificial intelligence models trained on large datasets predict market trends and advise investors, helping optimize portfolio performance.
-    """
-
-    entities, relations = extract_entities_relations(text)
-
-    print("=== Entities ===")
-    for e in entities:
-        print("-", e)
-
-    print("\n=== Relations ===")
-    for subj, verb, obj in relations:
-        print(f"{subj} --[{verb}]--> {obj}")
-    ans = generate_diagram(text,"erDiagram")
-    print(ans)

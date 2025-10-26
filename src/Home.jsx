@@ -14,7 +14,7 @@ export default function Home() {
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isDiagramLoading, setIsDiagramLoading] = useState(false);
 
-  const BACKEND_URL = "http://localhost:3000";
+  const BACKEND_URL = "https://visualbrief.onrender.com";
 
   const handleFileUpload = (file) => setUploadedFile(file);
   const handleGenerateSummary = async () => {
