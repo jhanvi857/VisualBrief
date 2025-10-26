@@ -2,12 +2,17 @@ import sys
 import json
 import io
 import nltk
+import logging
 from ML_module import parse_file, generate_summary, generate_diagram
+nltk_logger = logging.getLogger('nltk')
+nltk_logger.setLevel(logging.ERROR)
+
 for pkg in ["punkt", "punkt_tab"]:
     try:
         nltk.data.find(f"tokenizers/{pkg}")
     except LookupError:
-        nltk.download(pkg)
+        nltk.download(pkg, quiet=True)
+
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 mode = sys.argv[1]
 diagram_type = "flowchart"
