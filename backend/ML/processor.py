@@ -4,10 +4,9 @@ import io
 import os
 import nltk
 import contextlib
-from ML_module import parse_file, generate_summary, generate_diagram
-
-def suppress_output():
-    """Temporarily disable stdout and stderr during setup tasks"""
+import tempfile
+def silence_all():
+    """Redirect stdout and stderr fully to /dev/null during setup."""
     sys.stdout.flush()
     sys.stderr.flush()
     devnull = open(os.devnull, 'w')
@@ -15,16 +14,19 @@ def suppress_output():
     sys.stderr = devnull
 
 def restore_output():
-    """Restore stdout/stderr for JSON printing"""
+    """Restore clean stdout and stderr after setup."""
     sys.stdout = io.TextIOWrapper(sys.__stdout__.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.__stderr__.buffer, encoding='utf-8')
+silence_all()
 
-suppress_output()
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
-    nltk.download("punkt", quiet=True)
+    with contextlib.redirect_stdout(open(os.devnull, "w")), contextlib.redirect_stderr(open(os.devnull, "w")):
+        nltk.download("punkt", quiet=True)
+
 restore_output()
+from ML_module import parse_file, generate_summary, generate_diagram
 
 mode = sys.argv[1]
 diagram_type = "flowchart"
@@ -42,10 +44,15 @@ if len(sys.argv) > 2:
 else:
     text = sys.stdin.read()
 
-if mode == "parse":
-    print(json.dumps({"text": text}, ensure_ascii=False))
-elif mode == "summary":
-    print(json.dumps(generate_summary(text), ensure_ascii=False))
-elif mode == "diagram":
-    diagram_data = generate_diagram(text, diagram_type)
-    print(json.dumps(diagram_data, ensure_ascii=False))
+try:
+    if mode == "parse":
+        print(json.dumps({"text": text}, ensure_ascii=False))
+    elif mode == "summary":
+        print(json.dumps(generate_summary(text), ensure_ascii=False))
+    elif mode == "diagram":
+        diagram_data = generate_diagram(text, diagram_type)
+        print(json.dumps(diagram_data, ensure_ascii=False))
+    else:
+        print(json.dumps({"error": "Invalid mode"}, ensure_ascii=False))
+except Exception as e:
+    print(json.dumps({"error": str(e)}, ensure_ascii=False))

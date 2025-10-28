@@ -22,10 +22,13 @@ except:
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    print("Downloading spaCy model 'en_core_web_sm'...")
-    os.system("python -m spacy download en_core_web_sm --quiet")
+    import contextlib, subprocess
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f), contextlib.redirect_stderr(f):
+        subprocess.run(
+            ["python", "-m", "spacy", "download", "en_core_web_sm", "--quiet"],
+            stdout=f, stderr=f
+        )
     nlp = spacy.load("en_core_web_sm")
-
 # here, we're normalizing entities 
 def normalize_entity(name):
     """Standard cleanup: remove leading/trailing articles and common stop words for comparison."""
