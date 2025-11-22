@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import DashboardSidebar from "../../components/DashboardSidebar"
-import DashboardTopbar from "../../components/DashboardTopbar"
+import DashboardSidebar from "../../components/DashBoardSidebar"
+import DashboardTopbar from "../../components/DashBoardTopbar"
 import { Upload, CheckCircle, FileText } from "lucide-react"
 import { motion } from "framer-motion"
-import { mockApiLayer } from "../../lib/mockApi"
+import { mockApiLayer } from "../../lib/mockAPI"
 
 const summaryStyles = [
   { id: "bullet-points", name: "Bullet Points", description: "Key points in concise bullets" },

@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import DashboardSidebar from "../../components/DashboardSidebar"
-import DashboardTopbar from "../../components/DashboardTopbar"
+import DashboardSidebar from "../../components/DashBoardSidebar"
+import DashboardTopbar from "../../components/DashBoardTopbar"
 import { Link } from "react-router-dom"
 import { FileText, Download, Trash2, Eye } from "lucide-react"
-import { mockApiLayer } from "../../lib/mockApi"
+import { mockApiLayer } from "../../lib/mockAPI"
 
 export default function Dashboard() {
   const navigate = useNavigate()
