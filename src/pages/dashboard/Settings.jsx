@@ -1,9 +1,7 @@
-"use client"
-
-import { useState } from "react"
-import DashboardSidebar from "../../components/DashboardSidebar"
-import DashboardTopbar from "../../components/DashboardTopbar"
-import { Save, Trash2, Users, Lock, CreditCard } from "lucide-react"
+import { useState } from "react";
+import DashboardSidebar from "../../components/DashboardSidebar";
+import DashboardTopbar from "../../components/DashboardTopbar";
+import { Save, Trash2, Users, Lock, CreditCard } from "lucide-react";
 import { motion } from "framer-motion"
 
 const settingsTabs = [
