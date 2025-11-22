@@ -6,7 +6,7 @@ import DashboardSidebar from "../../components/DashBoardSidebar"
 import DashboardTopbar from "../../components/DashBoardTopbar"
 import { Download, RefreshCw, Edit2, Share2, ArrowLeft, FileText } from "lucide-react"
 import { motion } from "framer-motion"
-import { mockApiLayer } from "../../lib/mockApi"
+import { mockApiLayer } from "../../lib/mockAPI"
 
 export default function SummaryDetail() {
   const { id } = useParams()
