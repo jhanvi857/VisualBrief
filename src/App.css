@@ -1,1 +1,101 @@
-@import "tailwindcss";
+/* @import "tailwindcss";
+body {
+    color: white;
+} */
+ @import "tailwindcss";
+
+/* -----------------------------
+   GLOBAL APP LAYOUT IMPROVEMENT
+------------------------------ */
+
+/* Smooth background gradient for all pages */
+body {
+  background: linear-gradient(to bottom right, #0b0b0d, #111113, #0e0e12);
+  color: #e5e7eb;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Create a premium centered layout for all pages */
+.page-container {
+  max-width: 1350px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+/* Add a subtle glowing border around the whole app */
+.app-frame {
+  border: 1px solid rgba(120, 120, 131, 0.25);
+  border-radius: 20px;
+  margin: 24px auto;
+  padding: 0;
+  max-width: 1500px;
+
+  background: rgba(22, 22, 28, 0.6);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Smooth fade-in for all pages */
+.page-fade {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Universal card style — used anywhere */
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 30, 37, 0.55);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+/* Interactive hover effect */
+.card:hover {
+  border-color: rgba(129, 140, 248, 0.5);
+  transform: translateY(-3px);
+  transition: 0.2s;
+}
+
+/* Cleaner scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(130, 130, 150, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(to right, #6366f1, #8b5cf6);
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+  color: white;
+  font-weight: 500;
+  transition: 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.btn-outline {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+.btn-outline:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+}
