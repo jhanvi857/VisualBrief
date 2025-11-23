@@ -3,6 +3,7 @@ const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const authRoutes = require("./routes/auth");
 const {
   generateSummary,
   generateDiagramFromFile,
@@ -20,7 +21,7 @@ if (!fs.existsSync(uploadDir)) {
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use("/auth",authRoutes);
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => {

@@ -20,7 +20,7 @@ export default function DashboardTopbar() {
         {/* Search bar */}
         <div className="relative w-96">
           <Search size={18} className="absolute left-3 top-3 text-gray-500" />
-          <input type="text" placeholder="Search summaries..." className="input-field pl-10 w-full" />
+          <input type="text" placeholder="Search summaries..." className="p-2 rounded-lg border border-white input-field pl-10 w-full" />
         </div>
 
         {/* Right side */}

@@ -75,7 +75,7 @@ export default function Settings() {
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="input-field"
+                          className="p-2 border border-white rounded-lg input-field"
                         />
                       </div>
                       <div>
@@ -84,7 +84,7 @@ export default function Settings() {
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="input-field"
+                          className="p-2 border border-white rounded-lg input-field"
                         />
                       </div>
                       <div>
@@ -93,7 +93,7 @@ export default function Settings() {
                           type="text"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          className="input-field"
+                          className="p-2 border border-white rounded-lg input-field"
                         />
                       </div>
                       <button className="btn-primary flex items-center gap-2">

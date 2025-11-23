@@ -7,6 +7,7 @@ import DashboardTopbar from "../../components/DashBoardTopbar"
 import { Upload, CheckCircle, FileText } from "lucide-react"
 import { motion } from "framer-motion"
 import { mockApiLayer } from "../../lib/mockAPI"
+import ViewDemo from "../../components/ViewDemo"
 
 const summaryStyles = [
   { id: "bullet-points", name: "Bullet Points", description: "Key points in concise bullets" },
@@ -64,15 +65,17 @@ export default function UploadPage() {
 
     setStep(4)
   }
-
+  const userLoggedIn = true; 
   return (
     <div className="flex h-screen bg-gray-950">
       <DashboardSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardTopbar />
         <main className="flex-1 overflow-auto p-8">
+          <ViewDemo maxCredits={userLoggedIn ? 5 : 2} showNav={false}/>
+        </main>
+        {/* <main className="flex-1 overflow-auto p-8">
           <div className="max-w-2xl mx-auto">
-            {/* Step 1: Upload */}
             {step === 1 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <h1 className="text-3xl font-bold mb-2">Upload Your PDF</h1>
@@ -100,7 +103,6 @@ export default function UploadPage() {
               </motion.div>
             )}
 
-            {/* Step 2: Style Selection */}
             {step === 2 && file && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <h1 className="text-3xl font-bold mb-2">Choose Summary Style</h1>
@@ -142,7 +144,6 @@ export default function UploadPage() {
               </motion.div>
             )}
 
-            {/* Step 3: Processing */}
             {step === 3 && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -165,7 +166,6 @@ export default function UploadPage() {
               </motion.div>
             )}
 
-            {/* Step 4: Complete */}
             {step === 4 && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -187,7 +187,7 @@ export default function UploadPage() {
               </motion.div>
             )}
           </div>
-        </main>
+        </main> */}
       </div>
     </div>
   )
