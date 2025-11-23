@@ -1,5 +1,5 @@
 const express = require("express");
-const { supabase } = require("../supabaseClient");
+const supabase  = require("../supabaseClient");
 const router = express.Router();
 
 // signup route.
@@ -8,7 +8,6 @@ router.post("/signup", async (req, res) => {
     const { email, password, name } = req.body;
     if (!email || !password || !name) return res.status(400).json({ error: "Missing fields" });
 
-    // Sign up with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -38,18 +37,16 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return res.status(400).json({ error: error.message });
 
-    res.status(200).json({
-      session: data.session,
-      user: data.user,
-    });
+    res.json({ user: data.user, session: data.session });
   } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
