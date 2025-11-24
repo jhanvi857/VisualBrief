@@ -1,5 +1,5 @@
 const express = require("express");
-const { supabase } = require("../supabaseClient");
+const supabase  = require("../supabaseClient");
 const router = express.Router();
 
 // signup route.
