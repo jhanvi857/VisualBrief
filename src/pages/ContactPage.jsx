@@ -145,7 +145,7 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="input-field"
+                      className="p-2 border border-white rounded-lg input-field"
                       placeholder="Your name"
                     />
                   </div>
@@ -158,7 +158,7 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="input-field"
+                      className="p-2 border border-white rounded-lg input-field"
                       placeholder="you@example.com"
                     />
                   </div>
@@ -171,7 +171,7 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="input-field"
+                      className="p-2 border border-white rounded-lg input-field"
                       placeholder="How can we help?"
                     />
                   </div>
@@ -184,7 +184,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       rows="5"
-                      className="input-field resize-none"
+                      className="p-2 border border-white rounded-lg input-field resize-none"
                       placeholder="Tell us more about your inquiry..."
                     />
                   </div>
