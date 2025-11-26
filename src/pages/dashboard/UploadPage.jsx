@@ -22,7 +22,7 @@ export default function UploadPage() {
   const [file, setFile] = useState(null)
   const [selectedStyle, setSelectedStyle] = useState("bullet-points")
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [step, setStep] = useState(1) // 1: upload, 2: style, 3: processing, 4: done
+  const [step, setStep] = useState(1) 
 
   const handleDragOver = (e) => {
     e.preventDefault()
@@ -59,9 +59,15 @@ export default function UploadPage() {
       setUploadProgress(i)
     }
 
-    // Call mock API
-    await mockApiLayer.uploadPdf(file)
-    await mockApiLayer.generateSummary(file.name, selectedStyle)
+    // await mockApiLayer.uploadPdf(file)
+    // await mockApiLayer.generateSummary(file.name, selectedStyle)
+    const formData = new FormData();
+formData.append("file", file);
+formData.append("diagramType", selectedStyle);
+
+const res = await fetch(`${BACKEND_URL}/upload`, { method: "POST", body: formData });
+// const res = await fetch(`http://localhost:8000/upload`, { method: "POST", body: formData });
+const data = await res.json();
 
     setStep(4)
   }
