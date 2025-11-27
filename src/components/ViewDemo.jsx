@@ -10,7 +10,7 @@ import Footer from "./Footer";
 // const MAX_DEMO_CREDITS = 10;
 const LOCAL_KEY_CREDITS = "vb_demo_credits";
 const LOCAL_KEY_TIMESTAMP = "vb_demo_timestamp";
-const COOLDOWN_TIME = 2 * 1000; 
+const COOLDOWN_TIME = 2*60*60*1000; 
 // const BACKEND_URL = "http://localhost:8000/api";
 const BACKEND_URL = "https://visualbrief.onrender.com/api";
 
@@ -23,7 +23,7 @@ function formatCooldown(ms) {
 
 export default function ViewDemo({maxCredits = 5,showNav = true}) {
   const [credits, setCredits] = useState(maxCredits);
-  const [cooldown, setCooldown] = useState(0); // ms remaining
+  const [cooldown, setCooldown] = useState(0); 
   const [disabled, setDisabled] = useState(false);
 
   const [uploadedFile, setUploadedFile] = useState(null);
