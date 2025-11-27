@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from app.supabase_client import supabase
-from utils.password import hash_password, verify_password
+from app.utils.password import hash_password, verify_password
 
 router = APIRouter()
 
