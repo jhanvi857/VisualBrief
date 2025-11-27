@@ -8,7 +8,7 @@ app = FastAPI(title="DocSummarizer",version=1.0)
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://visual-brief.vercel.app/"
+    "https://visual-brief.vercel.app"
 ]
 app.add_middleware(
     CORSMiddleware,
