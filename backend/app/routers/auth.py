@@ -10,7 +10,6 @@ class Signup(BaseModel):
     password: str
     name: str
 
-
 class Login(BaseModel):
     email: EmailStr
     password: str
@@ -74,7 +73,7 @@ def login(body: Login):
         if not verify_password(body.password, user["password_hash"]):
             error_response("INVALID_CREDENTIALS", "Invalid email or password", 401)
 
-        from utils.jwt_handler import create_access_token
+        from app.utils.jwt_handler import create_access_token
         token = create_access_token({
             "user_id": user["id"],
             "email": user["email"]
