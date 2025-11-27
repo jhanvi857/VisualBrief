@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers.summarizer import router as summarizer_router
-from routers.auth import router as auth_router
+from app.routers.summarizer import router as summarizer_router
+from app.routers.auth import router as auth_router
 import os
 app = FastAPI(title="DocSummarizer",version=1.0)
 
