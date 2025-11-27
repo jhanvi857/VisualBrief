@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import os
 import shutil
-from config import UPLOAD_DIR
+from app.config import UPLOAD_DIR
 from app.services.nlp_service import generate_summary
 from app.services.diagram_service import generate_diagram_from_text
 import pdfplumber
