@@ -17,6 +17,7 @@
     "react": "^19.1.1",
     "react-cytoscapejs": "^2.0.0",
     "react-dom": "^19.1.1",
+    "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",
     "react-mermaid2": "^0.1.4",
     "react-router-dom": "^7.9.6",
