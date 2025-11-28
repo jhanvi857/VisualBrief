@@ -78,7 +78,7 @@ const data = await res.json();
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardTopbar />
         <main className="flex-1 overflow-auto p-8">
-          <ViewDemo maxCredits={userLoggedIn ? 5 : 2} showNav={false}/>
+          <ViewDemo maxCredits={5} showNav={false}/>
         </main>
       </div>
     </div>

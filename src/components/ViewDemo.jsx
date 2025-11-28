@@ -21,7 +21,7 @@ function formatCooldown(ms) {
   return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
 }
 
-export default function ViewDemo({maxCredits = 5,showNav = true}) {
+export default function ViewDemo({maxCredits = 2,showNav = true}) {
   const [credits, setCredits] = useState(maxCredits);
   const [cooldown, setCooldown] = useState(0); 
   const [disabled, setDisabled] = useState(false);
