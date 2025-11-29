@@ -3,7 +3,8 @@ import { ArrowRight, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Hero() {
-  const isLoggedIn = !!localStorage.getItem("vb_session");
+  const isLoggedIn = !!localStorage.getItem("access_token");
+  
   return (
     <section className="py-20 px-4 bg-linear-to-b from-gray-950 via-gray-900 to-gray-950">
       <div className="max-w-4xl mx-auto text-center">
@@ -45,7 +46,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* CTAs */}
+          {/*  Hidden for logged in users */}
           {!isLoggedIn && (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -62,6 +63,19 @@ export default function Hero() {
               >
                 <FileText size={18} />
                 View Demo
+              </Link>
+            </div>
+          )}
+          
+          {/* Show dashbord button for logged in users */}
+          {isLoggedIn && (
+            <div className="flex justify-center">
+              <Link
+                to="/dashboard"
+                className="btn-primary inline-flex items-center justify-center gap-2"
+              >
+                Go to Dashboard
+                <ArrowRight size={18} />
               </Link>
             </div>
           )}

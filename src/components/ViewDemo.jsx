@@ -6,11 +6,14 @@ import VisualPreview from "./VisualPreview";
 import ExportOptions from "./Export-options";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { getToken } from "../lib/mockAPI"; 
+import toast from "react-hot-toast";
 
-// const MAX_DEMO_CREDITS = 10;
+const DEMO_CREDITS = 2;
+const LOGGED_IN_CREDITS = 5;
 const LOCAL_KEY_CREDITS = "vb_demo_credits";
 const LOCAL_KEY_TIMESTAMP = "vb_demo_timestamp";
-const COOLDOWN_TIME = 2*60*60*1000; 
+const COOLDOWN_TIME = 2 * 60 * 60 * 1000; 
 // const BACKEND_URL = "http://localhost:8000/api";
 const BACKEND_URL = "https://visualbrief.onrender.com/api";
 
@@ -21,7 +24,12 @@ function formatCooldown(ms) {
   return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
 }
 
-export default function ViewDemo({maxCredits = 2,showNav = true}) {
+export default function ViewDemo({showNav = true, onUploadSuccess}) {
+  const userToken = getToken();
+  const isLoggedIn = !!userToken;
+  
+  const maxCredits = isLoggedIn ? LOGGED_IN_CREDITS : DEMO_CREDITS;
+  
   const [credits, setCredits] = useState(maxCredits);
   const [cooldown, setCooldown] = useState(0); 
   const [disabled, setDisabled] = useState(false);
@@ -33,26 +41,37 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
   const [diagramCode, setDiagramCode] = useState("");
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isDiagramLoading, setIsDiagramLoading] = useState(false);
-
+  const [newSummaryId, setNewSummaryId] = useState(null);
   useEffect(() => {
-    const storedCredits = parseInt(localStorage.getItem(LOCAL_KEY_CREDITS) || maxCredits);
-    const lastUsed = parseInt(localStorage.getItem(LOCAL_KEY_TIMESTAMP) || 0);
-
-    const now = Date.now();
-    const diff = now - lastUsed;
-
-    if (storedCredits === 0 && diff < COOLDOWN_TIME) {
-      setDisabled(true);
-      setCooldown(COOLDOWN_TIME - diff);
-    } else {
-      resetCredits();
+    if (isLoggedIn) {
+      setCredits(LOGGED_IN_CREDITS);
+      return;
     }
 
-    setCredits(storedCredits);
-  }, []);
+    const savedCredits = localStorage.getItem(LOCAL_KEY_CREDITS);
+    const savedTimestamp = localStorage.getItem(LOCAL_KEY_TIMESTAMP);
+
+    if (savedCredits) {
+      const creditsNum = parseInt(savedCredits, 10);
+      setCredits(creditsNum);
+
+      if (creditsNum === 0 && savedTimestamp && savedTimestamp !== "0") {
+        const elapsed = Date.now() - parseInt(savedTimestamp, 10);
+        const remaining = COOLDOWN_TIME - elapsed;
+
+        if (remaining > 0) {
+          setDisabled(true);
+          setCooldown(remaining);
+        } else {
+          resetCredits();
+        }
+      }
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!disabled) return;
+    
     const interval = setInterval(() => {
       setCooldown((prev) => {
         if (prev <= 1000) {
@@ -68,12 +87,16 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
 
   const updateCredits = (val) => {
     setCredits(val);
-    localStorage.setItem(LOCAL_KEY_CREDITS, val.toString());
+    if (!isLoggedIn) {
+      localStorage.setItem(LOCAL_KEY_CREDITS, val.toString());
+    }
   };
 
   const resetCredits = () => {
     updateCredits(maxCredits);
-    localStorage.setItem(LOCAL_KEY_TIMESTAMP, "0");
+    if (!isLoggedIn) {
+      localStorage.setItem(LOCAL_KEY_TIMESTAMP, "0");
+    }
     setDisabled(false);
     setCooldown(0);
   };
@@ -85,9 +108,10 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
     updateCredits(next);
 
     if (next === 0) {
-      // start cooldown
       const now = Date.now();
-      localStorage.setItem(LOCAL_KEY_TIMESTAMP, now.toString());
+      if (!isLoggedIn) {
+        localStorage.setItem(LOCAL_KEY_TIMESTAMP, now.toString());
+      }
       setDisabled(true);
       setCooldown(COOLDOWN_TIME);
     }
@@ -103,37 +127,86 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
 
   const handleFileUpload = (file) => setUploadedFile(file);
 
+  const handleSaveAndExit = () => {
+    if (onUploadSuccess) {
+      toast.success('Summary saved! Redirecting...');
+      setTimeout(onUploadSuccess, 500);
+    }
+  };
+
   const handleGenerateSummary = async () => {
     if (!uploadedFile) return;
+    
     if (!consumeCredit()) {
-      alert("No credits left. Wait for cooldown.");
+      toast.error('No credits left. Wait for cooldown or sign up for more!');
       return;
     }
-
+    
     setIsSummaryLoading(true);
+    setNewSummaryId(null);
+    setSummary(null);
+    setVisualData(null);
+
     const formData = new FormData();
     formData.append("file", uploadedFile);
     formData.append("diagramType", diagramType);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/upload`, { method: "POST", body: formData });
+      const endpoint = isLoggedIn ? `${BACKEND_URL}/upload` : `${BACKEND_URL}/upload-demo`;
+      
+      const headers = {};
+      if (isLoggedIn) {
+        headers['Authorization'] = `Bearer ${userToken}`;
+      }
+
+      const res = await fetch(endpoint, { 
+        method: "POST", 
+        headers: headers,
+        body: formData 
+      });
+      
       const data = await res.json();
 
-      setSummary(data.summary ?? { title: "No summary", content: "" });
-      setVisualData(data.diagram ?? null);
+      if (res.status === 401 && isLoggedIn) {
+        toast.error('Session expired. Please log in again.');
+        throw new Error("Unauthorized");
+      }
+
+      if (!res.ok) {
+        console.error("Upload API Error:", data);
+        toast.error(data.detail || "Server Error during generation.");
+        throw new Error(data.detail || "Server Error");
+      }
+
+      setSummary(data.summary);
+      setVisualData(data.diagram);
+      
+      if (isLoggedIn) {
+        setNewSummaryId(data.summaryId);
+        toast.success('Summary generated and saved! Scroll down to view.');
+      } else {
+        toast.success('Summary generated! Sign up to save your summaries.');
+      }
+      
     } catch (err) {
       refundCredit();
-      alert("Failed. Try again.");
+      console.error("Upload failed:", err);
+      if (err.message === "Unauthorized" && onUploadSuccess) {
+        onUploadSuccess();
+      }
     } finally {
       setIsSummaryLoading(false);
     }
   };
 
-  // --- Custom diagram generation ---
   const handleGenerateCustomDiagram = async () => {
-    if (!diagramCode.trim()) return;
+    if (!diagramCode.trim()) {
+      toast.error('Please enter some text first.');
+      return;
+    }
+    
     if (!consumeCredit()) {
-      alert("No credits left. Wait for cooldown.");
+      toast.error('No credits left. Wait for cooldown or sign up for more!');
       return;
     }
 
@@ -142,15 +215,24 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
     try {
       const res = await fetch(`${BACKEND_URL}/diagram`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ text: diagramCode, diagramType }),
       });
 
       const data = await res.json();
-      setVisualData(data.diagram ?? null);
+      
+      if (!res.ok) {
+        throw new Error(data.detail || "Diagram generation failed");
+      }
+      
+      setVisualData(data.diagram);
+      toast.success('Custom diagram generated!');
     } catch (err) {
       refundCredit();
-      alert("Diagram generation failed.");
+      console.error("Diagram generation error:", err);
+      toast.error(err.message || 'Diagram generation failed.');
     } finally {
       setIsDiagramLoading(false);
     }
@@ -170,7 +252,7 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
           </div>
 
           <p className="text-lg text-slate-400">
-            Demo Credits:{" "}
+            {isLoggedIn ? "Your" : "Demo"} Credits:{" "}
             <span className="text-indigo-400 font-semibold">
               {credits} / {maxCredits}
             </span>
@@ -183,30 +265,32 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
           )}
         </div>
 
-        {/* REMAINING UI (UNCHANGED FROM YOUR CODE) */}
-        {/* ---- KEEP EVERYTHING BELOW EXACT SAME ---- */}
-
         {/* Demo Banner & Reset */}
-        {!disabled ? (
+        {!isLoggedIn && !disabled && (
           <div className="max-w-6xl mx-auto mb-8 bg-slate-900/40 border border-slate-800 px-4 py-3 rounded-xl text-slate-300">
             <div className="flex items-center justify-between text-sm">
-              Demo mode — You get {maxCredits} free demo operations.
+              <span>Demo mode — You get {maxCredits} free demo operations. <a href="/signup" className="text-indigo-400 hover:underline">Sign up</a> for more!</span>
               <button
-                onClick={() => resetCredits()}
-                className="flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-800/90 text-slate-300"
+                onClick={() => {
+                  resetCredits();
+                  toast.success('Credits reset!');
+                }}
+                className="flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-800/90 text-slate-300 transition-colors"
               >
                 <RefreshCw size={14} /> Reset
               </button>
             </div>
           </div>
-        ) : (
-          <div className="max-w-6xl mx-auto mb-8 bg-red-600/10 border border-red-600/20 text-red-300 px-4 py-3 rounded-xl">
-            Demo credits exhausted — Wait for cooldown.
-          </div>
         )}
 
-        {/* Inputs, Output, Export — unchanged */}
-        {/* ------- (YOUR SAME UI CODE BELOW) ------- */}
+        {disabled && (
+          <div className="max-w-6xl mx-auto mb-8 bg-red-600/10 border border-red-600/20 text-red-300 px-4 py-3 rounded-xl">
+            {isLoggedIn 
+              ? "You've used all your credits. Wait for cooldown or upgrade your plan."
+              : "Demo credits exhausted. Sign up for more credits or wait for cooldown."
+            }
+          </div>
+        )}
 
         {/* FILE + CUSTOM INPUTS */}
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 mb-14">
@@ -223,13 +307,12 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
 
             <FileUploadSection onFileUpload={handleFileUpload} uploadedFile={uploadedFile} />
 
-            {/* Diagram Type */}
             <div className="mt-5">
               <label className="block text-white font-semibold mb-2">Diagram Type</label>
               <select
                 value={diagramType}
                 onChange={(e) => setDiagramType(e.target.value)}
-                className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 w-full"
+                className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 w-full focus:outline-none focus:border-indigo-500 transition-colors"
               >
                 <option value="flowchart">Flowchart</option>
                 <option value="erDiagram">ER Diagram</option>
@@ -243,7 +326,7 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
                 onClick={handleGenerateSummary}
                 disabled={isSummaryLoading || disabled}
                 className={`mt-6 w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition ${
-                  disabled
+                  disabled || isSummaryLoading
                     ? "bg-gray-700 cursor-not-allowed"
                     : "bg-linear-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
                 }`}
@@ -262,31 +345,50 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
           </div>
 
           {/* CUSTOM TEXT INPUT */}
-          {/* <div
+          <div
             className={`bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg ${
               disabled ? "opacity-60 pointer-events-none" : ""
             }`}
           >
             <div className="flex items-center gap-3 mb-4">
               <PenTool className="text-teal-400 w-6 h-6" />
-              <h2 className="text-xl font-semibold text-white">Custom Text / Steps</h2>
+              <h2 className="text-xl font-semibold text-white">
+                Custom Text / Steps
+              </h2>
+            </div>
+
+            <div className="mb-4">
+              <label className="text-white font-semibold mb-2 block">
+                Diagram Type
+              </label>
+              <select
+                value={diagramType}
+                onChange={(e) => setDiagramType(e.target.value)}
+                className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 w-full focus:outline-none focus:border-indigo-500 transition-colors"
+              >
+                <option value="flowchart">Flowchart</option>
+                <option value="erDiagram">ER Diagram</option>
+                <option value="conceptMap">Mindmap / Concept Map</option>
+                <option value="sequenceDiagram">Sequence Diagram</option>
+              </select>
             </div>
 
             <textarea
               value={diagramCode}
               onChange={(e) => setDiagramCode(e.target.value)}
-              className="w-full h-48 bg-gray-800 text-white p-3 rounded-lg border border-gray-700 resize-none font-mono"
+              className="w-full h-48 bg-gray-800 text-white p-3 rounded-lg border border-gray-700 resize-none font-mono focus:outline-none focus:border-indigo-500 transition-colors"
               placeholder="Write your steps or process description..."
             />
 
             <button
               onClick={handleGenerateCustomDiagram}
               disabled={isDiagramLoading || disabled}
-              className={`mt-4 w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition ${
-                disabled
-                  ? "bg-gray-700 cursor-not-allowed"
-                  : "bg-linear-to-br from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-              }`}
+              className={`mt-4 w-full py-3 rounded-xl font-semibold text-white 
+                flex items-center justify-center gap-2 transition ${
+                  disabled || isDiagramLoading
+                    ? "bg-gray-700 cursor-not-allowed"
+                    : "bg-linear-to-br from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+                }`}
             >
               {isDiagramLoading ? (
                 <>
@@ -298,66 +400,7 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
                 </>
               )}
             </button>
-          </div> */}
-          <div
-  className={`bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg ${
-    disabled ? "opacity-60 pointer-events-none" : ""
-  }`}
->
-  <div className="flex items-center gap-3 mb-4">
-    <PenTool className="text-teal-400 w-6 h-6" />
-    <h2 className="text-xl font-semibold text-white">
-      Custom Text / Steps
-    </h2>
-  </div>
-
-  {/* NEW DROPDOWN FOR CUSTOM TEXT */}
-  <div className="mb-4">
-    <label className="text-white font-semibold mb-2 block">
-      Diagram Type
-    </label>
-
-    <select
-      value={diagramType}
-      onChange={(e) => setDiagramType(e.target.value)}
-      className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 w-full"
-    >
-      <option value="flowchart">Flowchart</option>
-      <option value="erDiagram">ER Diagram</option>
-      <option value="conceptMap">Mindmap / Concept Map</option>
-      <option value="sequenceDiagram">Sequence Diagram</option>
-    </select>
-  </div>
-
-  <textarea
-    value={diagramCode}
-    onChange={(e) => setDiagramCode(e.target.value)}
-    className="w-full h-48 bg-gray-800 text-white p-3 rounded-lg border border-gray-700 resize-none font-mono"
-    placeholder="Write your steps or process description..."
-  />
-
-  <button
-    onClick={handleGenerateCustomDiagram}
-    disabled={isDiagramLoading || disabled}
-    className={`mt-4 w-full py-3 rounded-xl font-semibold text-white 
-      flex items-center justify-center gap-2 transition ${
-        disabled
-          ? "bg-gray-700 cursor-not-allowed"
-          : "bg-linear-to-br from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-      }`}
-  >
-    {isDiagramLoading ? (
-      <>
-        <Loader className="w-5 h-5 animate-spin" /> Generating...
-      </>
-    ) : (
-      <>
-        <Zap className="w-5 h-5" /> Generate Custom Diagram
-      </>
-    )}
-  </button>
-</div>
-
+          </div>
         </div>
 
         {/* OUTPUT SECTION */}
@@ -376,6 +419,32 @@ export default function ViewDemo({maxCredits = 2,showNav = true}) {
             </div>
           )}
         </div>
+        
+        {/* SAVE AND EXIT BUTTON Only for logged in users */}
+        {newSummaryId && isLoggedIn && (
+          <div className="max-w-6xl mx-auto mt-10 text-center">
+            <button
+              onClick={handleSaveAndExit}
+              className="bg-linear-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold px-8 py-3 rounded-xl transition-all transform hover:scale-105"
+            >
+              Go to Dashboard and View All Summaries
+            </button>
+          </div>
+        )}
+
+        {/* Sign up CTA for demo users */}
+        {!isLoggedIn && (summary || visualData) && (
+          <div className="max-w-6xl mx-auto mt-10 text-center bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-6">
+            <h3 className="text-xl font-bold text-white mb-2">Want to save your summaries?</h3>
+            <p className="text-gray-400 mb-4">Sign up to save unlimited summaries and access them anytime!</p>
+            <a 
+              href="/signup" 
+              className="inline-block bg-linear-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold px-8 py-3 rounded-xl transition-all"
+            >
+              Sign Up Now
+            </a>
+          </div>
+        )}
 
         {summary || visualData ? (
           <div className="max-w-6xl mx-auto mt-10">

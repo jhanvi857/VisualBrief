@@ -1,12 +1,10 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import DashboardSidebar from "../../components/DashBoardSidebar"
 import DashboardTopbar from "../../components/DashBoardTopbar"
 import { Link } from "react-router-dom"
 import { FileText, Download, Trash2, Eye } from "lucide-react"
-import { mockApiLayer } from "../../lib/mockAPI"
+import { apiLayer } from "../../lib/mockAPI" 
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -14,17 +12,21 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const user = localStorage.getItem("user")
-    // if (!user) {
-    //   navigate("/login")
-    //   return
-    // }
-
-    // Load summaries
-    mockApiLayer.getSummaries().then((data) => {
-      setSummaries(data)
-      setLoading(false)
-    })
+    apiLayer.getSummaries()
+      .then((data) => {
+        setSummaries(data)
+        setLoading(false)
+      })
+      .catch((error) => {
+        setLoading(false)
+        console.error("Error fetching summaries:", error)
+        if (error.message.includes("Authentication") || error.message.includes("Session expired")) {
+            // Optional: Clean up any remaining invalid session data
+            localStorage.removeItem("access_token"); 
+            navigate("/login");
+        }
+        
+      })
   }, [navigate])
 
   const handleDelete = (id) => {
@@ -88,6 +90,8 @@ export default function Dashboard() {
                     </div>
                     <h3 className="font-bold mb-1 truncate">{summary.fileName}</h3>
                     <p className="text-sm text-gray-500 mb-3">
+                      {/* Date mapping handles the conversion to a Date object, 
+                          so toLocaleDateString() works correctly here. */}
                       {summary.date.toLocaleDateString()} • {summary.summaryLength}
                     </p>
                     <div className="pt-3 border-t border-gray-800">
