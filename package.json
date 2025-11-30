@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
     "@tailwindcss/vite": "^4.1.15",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.546.0",
@@ -21,7 +22,6 @@
     "react-markdown": "^10.1.0",
     "react-mermaid2": "^0.1.4",
     "react-router-dom": "^7.9.6",
-    "supabase": "^2.63.1",
     "tailwindcss": "^4.1.15"
   },
   "devDependencies": {
