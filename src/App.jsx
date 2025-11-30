@@ -13,7 +13,9 @@ import TermsPage from "./pages/legal/TermsPage"
 import PrivacyPage from "./pages/legal/PrivacyPage"
 import ContactPage from "./pages/ContactPage"
 import ViewDemo from "./components/ViewDemo"
-import Navbar from "./components/Navbar"
+import Blog from "./components/Blog"
+import BlogPost from "./components/BlogPost"
+import Home from "./Home"
 
 export default function App() {
   const { theme } = useTheme();
@@ -35,6 +37,9 @@ export default function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/viewDemo" element={<ViewDemo />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/upload-home" element={<Home />} />
         </Routes>
       {/* </div> */}
     </div>

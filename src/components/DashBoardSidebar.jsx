@@ -40,10 +40,10 @@ export default function DashboardSidebar() {
         <nav className="flex-1 p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon
-            const isActive = location.pathname === item.href
+            const isActive = location.pathname === item.label
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 to={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth ${
                   isActive ? "bg-indigo-600 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
@@ -64,7 +64,7 @@ export default function DashboardSidebar() {
             const isActive = location.pathname === item.href
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 to={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth ${
                   isActive ? "bg-indigo-600 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
