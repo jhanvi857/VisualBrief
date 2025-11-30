@@ -16,6 +16,8 @@ import ViewDemo from "./components/ViewDemo"
 import Blog from "./components/Blog"
 import BlogPost from "./components/BlogPost"
 import Home from "./Home"
+import AuthCallback from "./pages/auth/AuthCallback"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 export default function App() {
   const { theme } = useTheme();
@@ -29,7 +31,7 @@ export default function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute> } />
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/summary/:id" element={<SummaryDetail />} />
           <Route path="/settings" element={<Settings />} />
@@ -40,6 +42,7 @@ export default function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/upload-home" element={<Home />} />
+          <Route path="/auth/callback" element={<AuthCallback/>} />
         </Routes>
       {/* </div> */}
     </div>

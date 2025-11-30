@@ -4,22 +4,47 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import AuthLayout from "../../components/AuthLayout"
 import { Mail, ArrowLeft } from "lucide-react"
+import { supabase } from "../../lib/supabaseClient"
+import toast from "react-hot-toast"
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (email) {
+    if (!email) {
+      toast.error("Please enter your email")
+      return
+    }
+
+    try {
+      setLoading(true)
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password` 
+      })
+
+      if (error) throw error
+
       setSubmitted(true)
+      toast.success(`Reset email sent to ${email}`)
+    } catch (err) {
+      console.error(err)
+      toast.error(err.message || "Failed to send reset email")
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <AuthLayout
       title={submitted ? "Check Your Email" : "Reset Password"}
-      subtitle={submitted ? `We've sent instructions to ${email}` : "Enter your email to receive reset instructions"}
+      subtitle={
+        submitted
+          ? `We've sent instructions to ${email}`
+          : "Enter your email to receive reset instructions"
+      }
     >
       {!submitted ? (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -38,8 +63,12 @@ export default function ForgotPassword() {
             </div>
           </div>
 
-          <button type="submit" className="btn-primary w-full">
-            Send Reset Link
+          <button
+            type="submit"
+            className="btn-primary w-full"
+            disabled={loading}
+          >
+            {loading ? "Sending..." : "Send Reset Link"}
           </button>
 
           <Link
