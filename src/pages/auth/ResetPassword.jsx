@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { useSearchParams, useNavigate, Link } from "react-router-dom"
 import AuthLayout from "../../components/AuthLayout"
@@ -14,7 +16,7 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   
-  const token = searchParams.get("access_token") // Supabase token from email link
+  const token = searchParams.get("access_token") 
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -43,7 +45,7 @@ export default function ResetPassword() {
 
       toast.success("Password reset successfully! Please login.")
       setSubmitted(true)
-      setTimeout(() => navigate("/login"), 2000) // redirect after success
+      setTimeout(() => navigate("/login"), 2000) 
     } catch (err) {
       console.error(err)
       toast.error(err.message || "Failed to reset password")
