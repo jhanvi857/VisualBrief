@@ -19,6 +19,7 @@ export default function UploadPage() {
           <ViewDemo
             maxCredits={5}
             showNav={false}
+            demo={false}
             onUploadSuccess={handleUploadSuccess}
           />
         </main>
