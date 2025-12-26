@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import toast from "react-hot-toast";
 
-// const API_BASE_URL = "https://visualbrief.onrender.com";
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://visualbrief.onrender.com";
+// const API_BASE_URL = "http://localhost:8000";
 
 export default function AuthCallback() {
   const navigate = useNavigate();

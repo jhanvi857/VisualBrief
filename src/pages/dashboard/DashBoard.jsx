@@ -21,7 +21,6 @@ export default function Dashboard() {
         setLoading(false)
         console.error("Error fetching summaries:", error)
         if (error.message.includes("Authentication") || error.message.includes("Session expired")) {
-            // Optional: Clean up any remaining invalid session data
             localStorage.removeItem("access_token"); 
             navigate("/login");
         }
