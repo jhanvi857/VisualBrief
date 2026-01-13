@@ -27,9 +27,9 @@
 // export default function ViewDemo({showNav = true, onUploadSuccess}) {
 //   const userToken = getToken();
 //   const isLoggedIn = !!userToken;
-  
+
 //   const maxCredits = isLoggedIn ? LOGGED_IN_CREDITS : DEMO_CREDITS;
-  
+
 //   const [credits, setCredits] = useState(maxCredits);
 //   const [cooldown, setCooldown] = useState(0); 
 //   const [disabled, setDisabled] = useState(false);
@@ -71,7 +71,7 @@
 
 //   useEffect(() => {
 //     if (!disabled) return;
-    
+
 //     const interval = setInterval(() => {
 //       setCooldown((prev) => {
 //         if (prev <= 1000) {
@@ -136,12 +136,12 @@
 
 //   const handleGenerateSummary = async () => {
 //     if (!uploadedFile) return;
-    
+
 //     if (!consumeCredit()) {
 //       toast.error('No credits left. Wait for cooldown or sign up for more!');
 //       return;
 //     }
-    
+
 //     setIsSummaryLoading(true);
 //     setNewSummaryId(null);
 //     setSummary(null);
@@ -153,7 +153,7 @@
 
 //     try {
 //       const endpoint = isLoggedIn ? `${BACKEND_URL}/upload` : `${BACKEND_URL}/upload-demo`;
-      
+
 //       const headers = {};
 //       if (isLoggedIn) {
 //         headers['Authorization'] = `Bearer ${userToken}`;
@@ -164,7 +164,7 @@
 //         headers: headers,
 //         body: formData 
 //       });
-      
+
 //       const data = await res.json();
 
 //       if (res.status === 401 && isLoggedIn) {
@@ -180,14 +180,14 @@
 
 //       setSummary(data.summary);
 //       setVisualData(data.diagram);
-      
+
 //       if (isLoggedIn) {
 //         setNewSummaryId(data.summaryId);
 //         toast.success('Summary generated and saved! Scroll down to view.');
 //       } else {
 //         toast.success('Summary generated! Sign up to save your summaries.');
 //       }
-      
+
 //     } catch (err) {
 //       refundCredit();
 //       console.error("Upload failed:", err);
@@ -204,7 +204,7 @@
 //       toast.error('Please enter some text first.');
 //       return;
 //     }
-    
+
 //     if (!consumeCredit()) {
 //       toast.error('No credits left. Wait for cooldown or sign up for more!');
 //       return;
@@ -222,11 +222,11 @@
 //       });
 
 //       const data = await res.json();
-      
+
 //       if (!res.ok) {
 //         throw new Error(data.detail || "Diagram generation failed");
 //       }
-      
+
 //       setVisualData(data.diagram);
 //       toast.success('Custom diagram generated!');
 //     } catch (err) {
@@ -419,7 +419,7 @@
 //             </div>
 //           )}
 //         </div>
-        
+
 //         {/* SAVE AND EXIT BUTTON Only for logged in users */}
 //         {newSummaryId && isLoggedIn && (
 //           <div className="max-w-6xl mx-auto mt-10 text-center">
@@ -465,16 +465,16 @@ import VisualPreview from "./VisualPreview";
 import ExportOptions from "./Export-options";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { getToken } from "../lib/mockAPI"; 
+import { getToken } from "../lib/mockAPI";
 import toast from "react-hot-toast";
 
 const DEMO_CREDITS = 2;
 const LOGGED_IN_CREDITS = 5;
 const LOCAL_KEY_CREDITS = "vb_demo_credits";
 const LOCAL_KEY_TIMESTAMP = "vb_demo_timestamp";
-const COOLDOWN_TIME = 2 * 60 * 60 * 1000; 
-const BACKEND_URL = "http://localhost:8000/api";
-// const BACKEND_URL = "https://visualbrief.onrender.com/api";
+const COOLDOWN_TIME = 2 * 60 * 60 * 1000;
+// const BACKEND_URL = "http://localhost:8000/api";
+const BACKEND_URL = "https://visualbrief.onrender.com/api";
 
 function formatCooldown(ms) {
   const totalSec = Math.floor(ms / 1000);
@@ -489,13 +489,23 @@ export default function ViewDemo({
   maxCredits: propMaxCredits,
   demo = true
 }) {
-  const userToken = getToken();
+  const [userToken, setUserToken] = useState(null);
+  const [isTokenLoading, setIsTokenLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await getToken();
+      setUserToken(token);
+      setIsTokenLoading(false);
+    };
+    fetchToken();
+  }, []);
+
   const isLoggedIn = !!userToken && !demo;
 
-  // Determine maxCredits
   const defaultCredits = propMaxCredits ?? (isLoggedIn ? LOGGED_IN_CREDITS : DEMO_CREDITS);
   const [credits, setCredits] = useState(defaultCredits);
-  const [cooldown, setCooldown] = useState(0); 
+  const [cooldown, setCooldown] = useState(0);
   const [disabled, setDisabled] = useState(false);
 
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -507,7 +517,6 @@ export default function ViewDemo({
   const [isDiagramLoading, setIsDiagramLoading] = useState(false);
   const [newSummaryId, setNewSummaryId] = useState(null);
 
-  // Initialize credits & cooldown for demo users
   useEffect(() => {
     if (isLoggedIn) {
       setCredits(defaultCredits);
@@ -535,10 +544,9 @@ export default function ViewDemo({
     }
   }, [isLoggedIn]);
 
-  // Countdown timer for demo cooldown
   useEffect(() => {
     if (!disabled) return;
-    
+
     const interval = setInterval(() => {
       setCooldown((prev) => {
         if (prev <= 1000) {
@@ -603,12 +611,12 @@ export default function ViewDemo({
 
   const handleGenerateSummary = async () => {
     if (!uploadedFile) return;
-    
+
     if (!consumeCredit()) {
       toast.error('No credits left. Wait for cooldown or sign up for more!');
       return;
     }
-    
+
     setIsSummaryLoading(true);
     setNewSummaryId(null);
     setSummary(null);
@@ -619,18 +627,20 @@ export default function ViewDemo({
     formData.append("diagramType", diagramType);
 
     try {
+      const currentToken = await getToken();
       const endpoint = demo ? `${BACKEND_URL}/upload-demo` : `${BACKEND_URL}/upload`;
       const headers = {};
-      if (isLoggedIn) {
-        headers['Authorization'] = `Bearer ${userToken}`;
+
+      if (currentToken && !demo) {
+        headers['Authorization'] = `Bearer ${currentToken}`;
       }
 
-      const res = await fetch(endpoint, { 
-        method: "POST", 
+      const res = await fetch(endpoint, {
+        method: "POST",
         headers: headers,
-        body: formData 
+        body: formData
       });
-      
+
       const data = await res.json();
 
       if (res.status === 401 && isLoggedIn) {
@@ -646,14 +656,14 @@ export default function ViewDemo({
 
       setSummary(data.summary);
       setVisualData(data.diagram);
-      
+
       if (isLoggedIn) {
         setNewSummaryId(data.summaryId);
         toast.success('Summary generated and saved! Scroll down to view.');
       } else {
         toast.success('Summary generated! Sign up to save your summaries.');
       }
-      
+
     } catch (err) {
       refundCredit();
       console.error("Upload failed:", err);
@@ -670,7 +680,7 @@ export default function ViewDemo({
       toast.error('Please enter some text first.');
       return;
     }
-    
+
     if (!consumeCredit()) {
       toast.error('No credits left. Wait for cooldown or sign up for more!');
       return;
@@ -681,18 +691,18 @@ export default function ViewDemo({
     try {
       const res = await fetch(`${BACKEND_URL}/diagram`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: diagramCode, diagramType }),
       });
 
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.detail || "Diagram generation failed");
       }
-      
+
       setVisualData(data.diagram);
       toast.success('Custom diagram generated!');
     } catch (err) {
@@ -859,8 +869,8 @@ export default function ViewDemo({
           <div className="max-w-6xl mx-auto mt-10 text-center bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-6">
             <h3 className="text-xl font-bold text-white mb-2">Want to save your summaries?</h3>
             <p className="text-gray-400 mb-4">Sign up to save unlimited summaries and access them anytime!</p>
-            <a 
-              href="/signup" 
+            <a
+              href="/signup"
               className="inline-block bg-linear-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold px-8 py-3 rounded-xl transition-all"
             >
               Sign Up Now
