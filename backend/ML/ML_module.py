@@ -2,11 +2,22 @@ import spacy
 import os
 import re
 import nltk
-from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.tokenize import word_tokenize
 from collections import Counter
 import string
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize.punkt import PunktSentenceTokenizer
 
+try:
+    nltk.data.find("tokenizers/punkt")
+except LookupError:
+    nltk.download("punkt")
+
+try:
+    nltk.data.find("corpora/stopwords")
+except LookupError:
+    nltk.download("stopwords")
+
+sentence_tokenizer = PunktSentenceTokenizer()
 try:
     import pdfplumber
     import docx
@@ -14,10 +25,10 @@ except ImportError:
     pdfplumber = None
     docx = None
 
-try:
-    nltk.data.find('tokenizers/punkt')
-except:
-    nltk.download("punkt", quiet=True)
+# try:
+#     nltk.data.find('tokenizers/punkt')
+# except:
+#     nltk.download("punkt", quiet=True)
 
 try:
     nlp = spacy.load("en_core_web_sm")
@@ -29,9 +40,8 @@ except OSError:
             stdout=f, stderr=f
         )
     nlp = spacy.load("en_core_web_sm")
-# here, we're normalizing entities 
+# here, normalizing entities 
 def normalize_entity(name):
-    """Standard cleanup: remove leading/trailing articles and common stop words for comparison."""
     name = name.strip().lower()
     
     name = re.sub(r'^(the|a|an|of|s)\s+', '', name)
@@ -98,28 +108,36 @@ def parse_file(file_path):
 # Summarizing..
 def generate_summary(text, n=5):
     from nltk.corpus import stopwords
-    nltk.download('punkt', quiet=True)
-    nltk.download('stopwords', quiet=True)
-    
-    stop_words = set(stopwords.words('english'))
-    sentences = sent_tokenize(text)
-    
-    words = [word.lower() for word in word_tokenize(text) if word.isalpha() and word.lower() not in stop_words]
+    from collections import Counter
+
+    if not text or not text.strip():
+        return {"title": "Document Summary", "content": ""}
+    stop_words = set(stopwords.words("english"))
+    sentences = sentence_tokenizer.tokenize(text)
+    words = [
+        w.lower()
+        for w in word_tokenize(text)
+        if w.isalpha() and w.lower() not in stop_words
+    ]
+
     freq = Counter(words)
-    
     sentence_scores = {}
     for sent in sentences:
         sent_words = [w.lower() for w in word_tokenize(sent) if w.isalpha()]
-        score = sum(freq.get(w,0) for w in sent_words)
-        sentence_scores[sent] = score
-    
-    top_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:n]
-    
-    summary = " ".join(top_sentences)
-    return {"title": "Document Summary", "content": summary}
+        sentence_scores[sent] = sum(freq.get(w, 0) for w in sent_words)
 
+    top_sentences = sorted(
+        sentence_scores,
+        key=sentence_scores.get,
+        reverse=True
+    )[:n]
 
-def consolidate_entities(entities):
+    return {
+        "title": "Document Summary",
+        "content": " ".join(top_sentences)
+    }
+
+def simple_entity_map(entities):
     mapping = {}
     for e in entities:
         key = e.lower().replace("\n"," ").strip()

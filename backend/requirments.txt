@@ -1,8 +1,8 @@
 fastapi
 uvicorn
-supabase
-nltk
 spacy
+nltk
+supabase
 python-multipart
 python-dotenv
 pydantic
