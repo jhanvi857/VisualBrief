@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+supabase
+nltk
+spacy
+python-multipart
+python-dotenv
+pydantic
+pydantic[email]
+python-jose
+bcrypt==3.2.2
+passlib==1.7.4
+pdfplumber
+python-docx

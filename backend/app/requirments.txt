@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-python-multipart
-supabase
-python-dotenv
-passlib[bcrypt]
-transformers
-torch
-pydantic
