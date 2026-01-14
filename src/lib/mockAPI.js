@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 
-const API_BASE_URL = "https://visualbrief.onrender.com";
-// const API_BASE_URL = "http://localhost:8000";
+// const API_BASE_URL = "https://visualbrief.onrender.com";
+const API_BASE_URL = "http://localhost:8000";
 
 export const getToken = async () => {
   const manualToken = localStorage.getItem("access_token");
@@ -11,7 +11,7 @@ export const getToken = async () => {
   const supabaseToken = sessionData?.session?.access_token;
   if (supabaseToken) return supabaseToken;
 
-  return null; 
+  return null;
 };
 
 export const apiLayer = {

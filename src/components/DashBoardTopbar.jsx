@@ -7,7 +7,7 @@ const API_BASE_URL = "https://visualbrief.onrender.com"
 export default function DashboardTopbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const navigate = useNavigate()
-  
+
   const user = JSON.parse(localStorage.getItem("vb_user") || "{}")
 
   const handleLogout = async () => {
@@ -16,7 +16,7 @@ export default function DashboardTopbar() {
       if (token) {
         await fetch(`${API_BASE_URL}/api/logout`, {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
@@ -28,7 +28,7 @@ export default function DashboardTopbar() {
       localStorage.removeItem("access_token")
       localStorage.removeItem("vb_session")
       localStorage.removeItem("vb_user")
-      localStorage.removeItem("user") 
+      localStorage.removeItem("user")
       setShowProfileMenu(false)
       navigate("/login")
     }
@@ -40,10 +40,10 @@ export default function DashboardTopbar() {
         {/* Search bar */}
         <div className="relative w-96">
           <Search size={18} className="absolute left-3 top-3 text-gray-500" />
-          <input 
-            type="text" 
-            placeholder="Search summaries..." 
-            className="p-2 rounded-lg border border-gray-700 bg-gray-800 text-gray-200 pl-10 w-full focus:outline-none focus:border-indigo-500 transition-colors" 
+          <input
+            type="text"
+            placeholder="Search summaries..."
+            className="p-2 rounded-lg border border-gray-700 bg-gray-800 text-gray-200 pl-10 w-full focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
 
@@ -71,7 +71,7 @@ export default function DashboardTopbar() {
 
             {showProfileMenu && (
               <div className="absolute right-0 top-full mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg w-48 py-2 z-50">
-                <button 
+                <button
                   onClick={() => {
                     setShowProfileMenu(false)
                     navigate("/settings")
