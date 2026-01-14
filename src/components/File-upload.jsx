@@ -40,9 +40,8 @@ export default function FileUploadSection({ onFileUpload, uploadedFile }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 ${
-        isDragging ? "border-indigo-400 bg-indigo-500/10" : "border-slate-700 bg-slate-800/50 hover:border-slate-600"
-      }`}
+      className={`relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 ${isDragging ? "border-indigo-400 bg-indigo-500/10" : "border-slate-700 bg-slate-800/50 hover:border-slate-600"
+        }`}
     >
       <input
         type="file"
