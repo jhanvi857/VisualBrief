@@ -107,12 +107,19 @@ def parse_file(file_path):
 
 # Summarizing..
 def generate_summary(text, n=5):
-    from nltk.corpus import stopwords
     from collections import Counter
 
     if not text or not text.strip():
         return {"title": "Document Summary", "content": ""}
-    stop_words = set(stopwords.words("english"))
+
+    DEFAULT_STOPWORDS = {
+        "the","a","an","and","or","but","if","while","with","to","of","in","on",
+        "for","from","by","is","are","was","were","be","been","being","this",
+        "that","these","those","as","at","it","its","into","about","over","after"
+    }
+
+    stop_words = DEFAULT_STOPWORDS
+
     sentences = sentence_tokenizer.tokenize(text)
     words = [
         w.lower()
