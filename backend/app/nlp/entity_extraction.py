@@ -3,12 +3,7 @@ import re
 from typing import List, Set, Dict
 
 # Load spaCy model
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    import subprocess
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm", "--quiet"])
-    nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
 
 def normalize_entity(name: str) -> str:
     name = name.strip().lower()

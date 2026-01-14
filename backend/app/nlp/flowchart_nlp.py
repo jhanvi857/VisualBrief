@@ -3,12 +3,7 @@ from typing import List, Dict, Any
 from .preprocess import normalize_text
 from .confidence import score_flowchart
 
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    import subprocess
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm", "--quiet"])
-    nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
 
 def extract_flowchart(text: str) -> Dict[str, Any]:
     text = normalize_text(text)

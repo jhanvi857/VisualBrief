@@ -3,12 +3,7 @@ import networkx as nx
 from typing import List, Dict, Any
 from .preprocess import normalize_text
 
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    import subprocess
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm", "--quiet"])
-    nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
 
 def extract_er(text: str) -> Dict[str, Any]:
     clean_text = normalize_text(text)
