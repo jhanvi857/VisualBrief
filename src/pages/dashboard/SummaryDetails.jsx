@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Download, RefreshCw, Edit2, Share2, ArrowLeft, FileText } from "lucide-react"
 // const BASE_URL = "http://localhost:8000/api"; 
-const BASE_URL = "https://visualbrief.onrender.com/api"; 
+const BASE_URL = "https://visualbrief.onrender.com/api";
 const getToken = () => localStorage.getItem('access_token');
 
 export default function SummaryDetail() {
@@ -14,7 +14,6 @@ export default function SummaryDetail() {
 
     useEffect(() => {
         const userToken = getToken();
-        
         if (!userToken) {
             console.warn("No token found. Redirecting to login.");
             navigate("/login");
@@ -36,7 +35,7 @@ export default function SummaryDetail() {
 
                 if (response.status === 401 || response.status === 403) {
                     console.error("Authentication failed during fetch. Redirecting.");
-                    localStorage.removeItem('access_token'); 
+                    localStorage.removeItem('access_token');
                     navigate("/login");
                     return;
                 }
@@ -52,7 +51,7 @@ export default function SummaryDetail() {
                 }
 
                 const data = await response.json();
-                console.log("📥 Fetched summary data:", data); // Debug log
+                // console.log("📥 Fetched summary data:", data); // Debug log
                 setSummary(data);
 
             } catch (err) {
@@ -64,13 +63,13 @@ export default function SummaryDetail() {
         }
 
         fetchSummary();
-    }, [id, navigate]) 
+    }, [id, navigate])
 
     const getSummaryContent = () => {
         if (!summary) return { bullets: [], keyQuotes: [], paragraphs: [], text: null };
-        
+
         const content = summary.summary_content;
-        
+
         if (content && typeof content === 'object') {
             return {
                 bullets: Array.isArray(content.bullets) ? content.bullets : [],
@@ -79,7 +78,7 @@ export default function SummaryDetail() {
                 text: content.text || content.content || null,
             };
         }
-        
+
         if (typeof content === 'string') {
             try {
                 const parsed = JSON.parse(content);
@@ -99,7 +98,7 @@ export default function SummaryDetail() {
                 };
             }
         }
-        
+
         return { bullets: [], keyQuotes: [], paragraphs: [], text: null };
     };
 
@@ -132,7 +131,7 @@ export default function SummaryDetail() {
                                 onClick={() => navigate("/dashboard")}
                                 className="mt-4 text-indigo-400 hover:text-indigo-300 flex items-center justify-center mx-auto transition-colors"
                             >
-                                <ArrowLeft size={16} className="mr-1"/> Go back to Dashboard
+                                <ArrowLeft size={16} className="mr-1" /> Go back to Dashboard
                             </button>
                         </div>
                     </main>
@@ -160,7 +159,7 @@ export default function SummaryDetail() {
                                         {summary.file_name || "Untitled Summary"}
                                     </h1>
                                     <p className="text-gray-400">
-                                        {summary.created_at 
+                                        {summary.created_at
                                             ? new Date(summary.created_at).toLocaleDateString()
                                             : "Date unknown"
                                         }
@@ -170,26 +169,26 @@ export default function SummaryDetail() {
 
                             {/* Action Buttons */}
                             <div className="flex gap-3 text-gray-300">
-                                <button 
-                                    className="p-2 hover:bg-gray-800 rounded-lg hover:text-white transition-colors" 
+                                <button
+                                    className="p-2 hover:bg-gray-800 rounded-lg hover:text-white transition-colors"
                                     title="Share"
                                 >
                                     <Share2 size={20} />
                                 </button>
-                                <button 
-                                    className="p-2 hover:bg-gray-800 rounded-lg hover:text-white transition-colors" 
+                                <button
+                                    className="p-2 hover:bg-gray-800 rounded-lg hover:text-white transition-colors"
                                     title="Edit"
                                 >
                                     <Edit2 size={20} />
                                 </button>
-                                <button 
-                                    className="p-2 hover:bg-gray-800 rounded-lg hover:text-white transition-colors" 
+                                <button
+                                    className="p-2 hover:bg-gray-800 rounded-lg hover:text-white transition-colors"
                                     title="Regenerate"
                                 >
                                     <RefreshCw size={20} />
                                 </button>
-                                <button 
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 transition-colors" 
+                                <button
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 transition-colors"
                                     title="Download"
                                 >
                                     <Download size={20} />
@@ -210,7 +209,7 @@ export default function SummaryDetail() {
                                 <div className="bg-gray-800 p-4 rounded-xl">
                                     <p className="text-gray-400 text-sm mb-1">Summary Type</p>
                                     <p className="font-bold capitalize text-gray-200">
-                                        {summary.summary_type 
+                                        {summary.summary_type
                                             ? summary.summary_type.replace(/[-_]/g, " ")
                                             : "Standard"
                                         }
@@ -219,7 +218,7 @@ export default function SummaryDetail() {
                                 <div className="bg-gray-800 p-4 rounded-xl">
                                     <p className="text-gray-400 text-sm mb-1">Created</p>
                                     <p className="font-bold text-gray-200">
-                                        {summary.created_at 
+                                        {summary.created_at
                                             ? new Date(summary.created_at).toLocaleDateString()
                                             : "N/A"
                                         }
@@ -230,7 +229,7 @@ export default function SummaryDetail() {
                             {/* Summary Content Section. Handles Multiple Formats */}
                             <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
                                 <h2 className="text-xl font-bold mb-4 text-white">Summary</h2>
-                                
+
                                 {/* plain test-para */}
                                 {summaryContent.text && (
                                     <div className="prose prose-invert max-w-none">
@@ -239,7 +238,7 @@ export default function SummaryDetail() {
                                         </p>
                                     </div>
                                 )}
-                                
+
                                 {/* para arr. */}
                                 {summaryContent.paragraphs.length > 0 && (
                                     <div className="space-y-4">
@@ -250,7 +249,7 @@ export default function SummaryDetail() {
                                         ))}
                                     </div>
                                 )}
-                                
+
                                 {/* bullet points.*/}
                                 {summaryContent.bullets.length > 0 && (
                                     <div>
@@ -265,13 +264,13 @@ export default function SummaryDetail() {
                                         </ul>
                                     </div>
                                 )}
-                                
+
                                 {/* fallback*/}
-                                {!summaryContent.text && 
-                                 summaryContent.bullets.length === 0 && 
-                                 summaryContent.paragraphs.length === 0 && (
-                                    <p className="text-gray-400 italic">No summary content available.</p>
-                                )}
+                                {!summaryContent.text &&
+                                    summaryContent.bullets.length === 0 &&
+                                    summaryContent.paragraphs.length === 0 && (
+                                        <p className="text-gray-400 italic">No summary content available.</p>
+                                    )}
                             </div>
                             {/* quotes */}
                             {summaryContent.keyQuotes.length > 0 && (

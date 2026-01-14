@@ -20,7 +20,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,7 +30,7 @@ export default function Settings() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem("access_token");
-      
+
       if (!token) {
         navigate("/login");
         return;
@@ -57,7 +57,7 @@ export default function Settings() {
 
         const userData = await response.json();
         console.log("📥 Fetched user data:", userData);
-        
+
         setFormData({
           name: userData.name || "",
           email: userData.email || "",
@@ -98,9 +98,9 @@ export default function Settings() {
 
       const updatedUser = await response.json();
       localStorage.setItem("vb_user", JSON.stringify(updatedUser));
-      
+
       setMessage({ type: "success", text: "Profile updated successfully!" });
-      
+
       setTimeout(() => setMessage(null), 3000);
 
     } catch (error) {
@@ -177,11 +177,10 @@ export default function Settings() {
             {/* Success/Error Message */}
             {message && (
               <div
-                className={`mb-6 p-4 rounded-lg ${
-                  message.type === "success"
+                className={`mb-6 p-4 rounded-lg ${message.type === "success"
                     ? "bg-green-500/10 border border-green-500/30 text-green-400"
                     : "bg-red-500/10 border border-red-500/30 text-red-400"
-                }`}
+                  }`}
               >
                 {message.text}
               </div>
@@ -195,11 +194,10 @@ export default function Settings() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-                      activeTab === tab.id
+                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${activeTab === tab.id
                         ? "border-indigo-500 text-indigo-400"
                         : "border-transparent text-gray-400 hover:text-gray-300"
-                    }`}
+                      }`}
                   >
                     <Icon size={18} />
                     {tab.label}
