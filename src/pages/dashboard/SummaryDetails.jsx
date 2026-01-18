@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Download, RefreshCw, Edit2, Share2, ArrowLeft, FileText } from "lucide-react"
-// const BASE_URL = "http://localhost:8000/api"; 
+import MermaidRenderer from "../../components/MermaidRenderer"
+// const BASE_URL = "http://localhost:8000/api";
 const BASE_URL = "https://visualbrief.onrender.com/api";
 const getToken = () => localStorage.getItem('access_token');
 
@@ -225,6 +226,16 @@ export default function SummaryDetail() {
                                     </p>
                                 </div>
                             </div>
+
+                            {/* Diagram Section */}
+                            {summary.diagram_content?.mermaid && (
+                                <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
+                                    <h2 className="text-xl font-bold mb-4 text-white">Visual Brief</h2>
+                                    <div className="bg-white rounded-lg p-4 overflow-hidden">
+                                        <MermaidRenderer chart={summary.diagram_content.mermaid} />
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Summary Content Section. Handles Multiple Formats */}
                             <div className="bg-gray-800 p-6 rounded-xl shadow-lg">

@@ -4,7 +4,8 @@ import DashboardSidebar from "../../components/DashBoardSidebar"
 import DashboardTopbar from "../../components/DashBoardTopbar"
 import { Link } from "react-router-dom"
 import { FileText, Download, Trash2, Eye } from "lucide-react"
-import { apiLayer } from "../../lib/mockAPI" 
+import { apiLayer, getToken } from "../../lib/mockAPI"
+import toast from "react-hot-toast"
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -21,16 +22,35 @@ export default function Dashboard() {
         setLoading(false)
         console.error("Error fetching summaries:", error)
         if (error.message.includes("Authentication") || error.message.includes("Session expired")) {
-            localStorage.removeItem("access_token"); 
-            navigate("/login");
+          localStorage.removeItem("access_token");
+          navigate("/login");
         }
-        
+
       })
   }, [navigate])
 
-  const handleDelete = (id) => {
-    setSummaries(summaries.filter((s) => s.id !== id))
-  }
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this visual brief?")) return;
+
+    try {
+      const userToken = await getToken();
+      // const response = await fetch(`http://localhost:8000/api/summaries/${id}`, {
+      const response = await fetch(`https://visualbrief.onrender.com/api/summaries/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Delete failed");
+
+      setSummaries(summaries.filter((s) => s.id !== id));
+      toast.success("Visual brief deleted successfully");
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete visual brief");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-950">

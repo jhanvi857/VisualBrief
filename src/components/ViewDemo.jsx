@@ -162,11 +162,11 @@ export default function ViewDemo({
 
     const formData = new FormData();
     formData.append("file", uploadedFile);
-    formData.append("diagramType", diagramType);
+    formData.append("diagram_type", diagramType);
 
     try {
       const currentToken = await getToken();
-      const endpoint = demo ? `${BACKEND_URL}/upload-demo` : `${BACKEND_URL}/upload`;
+      const endpoint = `${BACKEND_URL}/generate-diagram`;
       const headers = {};
 
       if (currentToken && !demo) {
@@ -186,27 +186,15 @@ export default function ViewDemo({
         throw new Error("Unauthorized");
       }
 
-      if (!res.ok) {
-        console.error("Upload API Error:", data);
-        toast.error(data.detail || "Server Error during generation.");
-        throw new Error(data.detail || "Server Error");
-      }
-
       setVisualData(data);
-
-      if (isLoggedIn) {
+      if (data.briefId) {
         setNewBriefId(data.briefId);
-        toast.success('Visual Brief generated and saved!');
-      } else {
-        toast.success('Visual Brief generated!');
       }
+      toast.success('Visual Brief generated!');
 
     } catch (err) {
       refundCredit();
       console.error("Upload failed:", err);
-      if (err.message === "Unauthorized" && onUploadSuccess) {
-        onUploadSuccess();
-      }
     } finally {
       setIsLoading(false);
     }
@@ -224,14 +212,23 @@ export default function ViewDemo({
     }
 
     setIsLoading(true);
+    setVisualData(null);
+
+    const formData = new FormData();
+    formData.append("text", diagramCode);
+    formData.append("diagram_type", diagramType);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/diagram`, {
+      const currentToken = await getToken();
+      const headers = {};
+      if (currentToken && !demo) {
+        headers['Authorization'] = `Bearer ${currentToken}`;
+      }
+
+      const res = await fetch(`${BACKEND_URL}/generate-diagram`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: diagramCode, diagramType }),
+        headers: headers,
+        body: formData,
       });
 
       const data = await res.json();
@@ -241,6 +238,9 @@ export default function ViewDemo({
       }
 
       setVisualData(data);
+      if (data.briefId) {
+        setNewBriefId(data.briefId);
+      }
       toast.success('Visual Brief generated!');
     } catch (err) {
       refundCredit();
@@ -299,9 +299,9 @@ export default function ViewDemo({
                 className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 w-full focus:outline-none focus:border-indigo-500 transition-colors"
               >
                 <option value="flowchart">Flowchart</option>
-                <option value="erDiagram">ER Diagram</option>
+                <option value="er">ER Diagram</option>
                 <option value="conceptMap">Concept Map</option>
-                <option value="sequenceDiagram">Sequence Diagram</option>
+                <option value="mindMap">Mindmap</option>
               </select>
             </div>
 
@@ -341,9 +341,9 @@ export default function ViewDemo({
                 className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 w-full focus:outline-none focus:border-indigo-500 transition-colors"
               >
                 <option value="flowchart">Flowchart</option>
-                <option value="erDiagram">ER Diagram</option>
-                <option value="conceptMap">Mindmap / Concept Map</option>
-                <option value="sequenceDiagram">Sequence Diagram</option>
+                <option value="er">ER Diagram</option>
+                <option value="conceptMap">Concept Map</option>
+                <option value="mindMap">Mindmap</option>
               </select>
             </div>
 
