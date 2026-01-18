@@ -1,5 +1,5 @@
 from typing import List
-from ..nlp.diagram_schema import DiagramSchema
+from app.schema.diagram_schema import DiagramSchema
 
 def render_logic(schema: DiagramSchema) -> List[str]:
     logic_lines = []

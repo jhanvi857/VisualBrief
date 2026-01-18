@@ -4,7 +4,7 @@ from typing import Optional
 from app.services.llm_service import llm_service
 from app.nlp.router import route_nlp
 from app.nlp.mermaid_adapter import to_mermaid
-from app.nlp.diagram_schema import DiagramSchema
+from app.schema.diagram_schema import DiagramSchema
 from app.utils.file_handler import extract_text_from_bytes
 import logging
 
@@ -18,7 +18,7 @@ async def generate_diagram(
     diagram_type: str = Form(...),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
 ):
-    from app.summaries import decode_access_token
+    from app.briefs import decode_access_token
     import uuid
     from app.supabase_client import supabase
     from app.renderers.logic_renderer import render_logic
@@ -57,17 +57,25 @@ async def generate_diagram(
     result_dict = route_nlp(arrow_format, diagram_type)
     
     # 3. Convert to Mermaid
+    mermaid_code = ""
+    steps = []
+    logic = []
+    
     try:
-        schema = DiagramSchema(**result_dict)
-        mermaid_code = to_mermaid(schema)
-        steps = render_steps(schema)
-        logic = render_logic(schema)
+        schema_obj = DiagramSchema(**result_dict)
+        mermaid_code = to_mermaid(schema_obj)
+        steps = render_steps(schema_obj)
+        logic = render_logic(schema_obj)
         result_dict["mermaid"] = mermaid_code
         result_dict["steps"] = steps
         result_dict["logic"] = logic
     except Exception as e:
-        logger.error(f"Error converting: {e}")
-        return {"success": False, "detail": str(e)}
+        logger.error(f"Error converting to visual format: {e}")
+        # We still return the result_dict but without mermaid if it failed
+        result_dict["mermaid"] = None
+        result_dict["success"] = False
+        result_dict["detail"] = f"Visual conversion error: {str(e)}"
+        return result_dict
 
     # 4. Save if logged in
     if current_user_id:
@@ -76,8 +84,8 @@ async def generate_diagram(
             "id": new_id,
             "user_id": current_user_id,
             "file_name": file_name,
-            "summary_type": diagram_type,
-            "summary_content": logic,
+            "brief_type": diagram_type,
+            "brief_content": logic,
             "diagram_content": {
                 "mermaid": mermaid_code,
                 "schema": result_dict,
@@ -85,7 +93,7 @@ async def generate_diagram(
                 "metadata": result_dict.get("metadata", {})
             }
         }
-        supabase.table("summaries").insert(insert_data).execute()
+        supabase.table("visual_briefs").insert(insert_data).execute()
         result_dict["briefId"] = new_id
 
     result_dict["metadata"]["raw_arrow_format"] = arrow_format

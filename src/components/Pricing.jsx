@@ -10,7 +10,7 @@ const plans = [
     name: "Starter",
     price: 29,
     description: "Perfect for individuals",
-    features: ["Up to 50 PDFs/month", "All summary styles", "Email support", "Basic analytics"],
+    features: ["Up to 50 briefs/month", "All diagram types", "Email support", "Basic analytics"],
     cta: "Get Started",
     featured: false,
   },
@@ -19,8 +19,8 @@ const plans = [
     price: 99,
     description: "For power users & teams",
     features: [
-      "Unlimited PDFs/month",
-      "All summary styles",
+      "Unlimited briefs/month",
+      "All diagram types",
       "Priority support",
       "Advanced analytics",
       "Team collaboration",
@@ -67,17 +67,15 @@ export default function Pricing() {
           <div className="flex items-center justify-center gap-4 bg-gray-800 w-fit mx-auto px-2 py-2 rounded-lg">
             <button
               onClick={() => setIsYearly(false)}
-              className={`px-4 py-2 rounded transition-smooth ${
-                !isYearly ? "bg-indigo-600 text-white" : "text-gray-400"
-              }`}
+              className={`px-4 py-2 rounded transition-smooth ${!isYearly ? "bg-indigo-600 text-white" : "text-gray-400"
+                }`}
             >
               Monthly
             </button>
             <button
               onClick={() => setIsYearly(true)}
-              className={`px-4 py-2 rounded transition-smooth ${
-                isYearly ? "bg-indigo-600 text-white" : "text-gray-400"
-              }`}
+              className={`px-4 py-2 rounded transition-smooth ${isYearly ? "bg-indigo-600 text-white" : "text-gray-400"
+                }`}
             >
               Yearly <span className="text-sm text-green-400">Save 20%</span>
             </button>
@@ -88,11 +86,10 @@ export default function Pricing() {
           {plans.map((plan, idx) => (
             <motion.div
               key={idx}
-              className={`rounded-2xl p-8 transition-smooth ${
-                plan.featured
+              className={`rounded-2xl p-8 transition-smooth ${plan.featured
                   ? "border-2 border-indigo-500 bg-indigo-500/5 relative"
                   : "border border-gray-800 bg-gray-800/30"
-              }`}
+                }`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
@@ -124,9 +121,8 @@ export default function Pricing() {
 
               <Link
                 to="/signup"
-                className={`block w-full text-center py-3 rounded-lg font-medium transition-smooth mb-8 ${
-                  plan.featured ? "btn-primary" : "btn-outline"
-                }`}
+                className={`block w-full text-center py-3 rounded-lg font-medium transition-smooth mb-8 ${plan.featured ? "btn-primary" : "btn-outline"
+                  }`}
               >
                 {plan.cta}
               </Link>

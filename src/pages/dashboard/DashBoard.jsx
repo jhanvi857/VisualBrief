@@ -9,23 +9,22 @@ import toast from "react-hot-toast"
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [summaries, setSummaries] = useState([])
+  const [briefs, setBriefs] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    apiLayer.getSummaries()
+    apiLayer.getBriefs()
       .then((data) => {
-        setSummaries(data)
+        setBriefs(data)
         setLoading(false)
       })
       .catch((error) => {
         setLoading(false)
-        console.error("Error fetching summaries:", error)
+        console.error("Error fetching briefs:", error)
         if (error.message.includes("Authentication") || error.message.includes("Session expired")) {
           localStorage.removeItem("access_token");
           navigate("/login");
         }
-
       })
   }, [navigate])
 
@@ -34,8 +33,8 @@ export default function Dashboard() {
 
     try {
       const userToken = await getToken();
-      // const response = await fetch(`http://localhost:8000/api/summaries/${id}`, {
-      const response = await fetch(`https://visualbrief.onrender.com/api/summaries/${id}`, {
+      // const response = await fetch(`http://localhost:8000/api/briefs/${id}`, {
+      const response = await fetch(`https://visualbrief.onrender.com/api/briefs/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${userToken}`,
@@ -44,7 +43,7 @@ export default function Dashboard() {
 
       if (!response.ok) throw new Error("Delete failed");
 
-      setSummaries(summaries.filter((s) => s.id !== id));
+      setBriefs(briefs.filter((b) => b.id !== id));
       toast.success("Visual brief deleted successfully");
     } catch (error) {
       console.error("Delete error:", error);
@@ -62,15 +61,15 @@ export default function Dashboard() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-bold">Your Summaries</h1>
-                <p className="text-gray-400">Manage and access all your PDF summaries</p>
+                <h1 className="text-3xl font-bold">Your Visual Briefs</h1>
+                <p className="text-gray-400">Manage and access all your generated diagrams</p>
               </div>
               <Link to="/upload" className="btn-primary">
-                Upload New PDF
+                Generate New Brief
               </Link>
             </div>
 
-            {/* Summaries grid */}
+            {/* Briefs grid */}
             {loading ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -81,15 +80,15 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-            ) : summaries.length > 0 ? (
+            ) : briefs.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {summaries.map((summary) => (
-                  <div key={summary.id} className="card group">
+                {briefs.map((brief) => (
+                  <div key={brief.id} className="card group">
                     <div className="flex items-start justify-between mb-4">
                       <FileText size={32} className="text-indigo-500" />
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-smooth">
                         <Link
-                          to={`/summary/${summary.id}`}
+                          to={`/visual-brief/${brief.id}`}
                           className="p-2 hover:bg-gray-800 rounded-lg transition-smooth"
                           title="View"
                         >
@@ -99,7 +98,7 @@ export default function Dashboard() {
                           <Download size={16} />
                         </button>
                         <button
-                          onClick={() => handleDelete(summary.id)}
+                          onClick={() => handleDelete(brief.id)}
                           className="p-2 hover:bg-red-900/30 rounded-lg transition-smooth text-red-400"
                           title="Delete"
                         >
@@ -107,15 +106,13 @@ export default function Dashboard() {
                         </button>
                       </div>
                     </div>
-                    <h3 className="font-bold mb-1 truncate">{summary.fileName}</h3>
+                    <h3 className="font-bold mb-1 truncate">{brief.fileName}</h3>
                     <p className="text-sm text-gray-500 mb-3">
-                      {/* Date mapping handles the conversion to a Date object, 
-                          so toLocaleDateString() works correctly here. */}
-                      {summary.date.toLocaleDateString()} • {summary.summaryLength}
+                      {brief.date.toLocaleDateString()} • {brief.style}
                     </p>
                     <div className="pt-3 border-t border-gray-800">
                       <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded">
-                        {summary.style}
+                        {brief.style}
                       </span>
                     </div>
                   </div>
@@ -124,10 +121,10 @@ export default function Dashboard() {
             ) : (
               <div className="text-center py-16">
                 <FileText size={48} className="mx-auto text-gray-700 mb-4 opacity-50" />
-                <h3 className="text-xl font-bold mb-2">No summaries yet</h3>
-                <p className="text-gray-400 mb-6">Upload your first PDF to get started</p>
+                <h3 className="text-xl font-bold mb-2">No visual briefs yet</h3>
+                <p className="text-gray-400 mb-6">Upload a file or provide text to generate your first diagram</p>
                 <Link to="/upload" className="btn-primary">
-                  Upload PDF
+                  Get Started
                 </Link>
               </div>
             )}

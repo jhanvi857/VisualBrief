@@ -1,4 +1,4 @@
-from .diagram_schema import DiagramSchema
+from app.schema.diagram_schema import DiagramSchema
 
 def to_mermaid(schema: DiagramSchema) -> str:
     """

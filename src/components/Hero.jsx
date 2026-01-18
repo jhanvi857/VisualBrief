@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   const isLoggedIn = !!localStorage.getItem("access_token");
-  
+
   return (
     <section className="py-20 px-4 bg-linear-to-b from-gray-950 via-gray-900 to-gray-950">
       <div className="max-w-4xl mx-auto text-center">
@@ -15,34 +15,33 @@ export default function Hero() {
         >
           <div className="inline-block mb-6 px-4 py-2 bg-indigo-500/10 border border-indigo-500/30 rounded-full">
             <p className="text-indigo-400 text-sm font-medium">
-              Convert PDFs into Visual Intelligence
+              Intelligent Logic Extraction
             </p>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
-            Transform Long PDFs into{" "}
-            <span className="text-indigo-400">Visual Summaries & Diagrams</span>
+            Transform Documents into{" "}
+            <span className="text-indigo-400">Visual Briefs & Diagrams</span>
           </h1>
 
           <p className="text-xl text-gray-400 mb-8 text-balance">
-            Go beyond summaries. Instantly generate diagrams, flowcharts, ER
-            diagrams, and structured visual representations. All automatically
-            from your PDF.
+            Instantly generate flowcharts, ER diagrams, and structured visual representations
+            from your text or files. Understand complex processes at a glance.
           </p>
 
           {/* Feature bullets */}
           <div className="grid md:grid-cols-3 gap-4 my-10 text-sm text-gray-400">
             <div className="flex items-center justify-center gap-2">
               <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
-              AI-powered PDF summaries
+              AI-powered Logic Extraction
             </div>
             <div className="flex items-center justify-center gap-2">
               <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
-              Auto-generated diagrams (Flow, ER, UML)
+              Auto-generated Diagrams
             </div>
             <div className="flex items-center justify-center gap-2">
               <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
-              Export & share instantly
+              Secure Persistent Storage
             </div>
           </div>
 
@@ -66,7 +65,7 @@ export default function Hero() {
               </Link>
             </div>
           )}
-          
+
           {/* Show dashbord button for logged in users */}
           {isLoggedIn && (
             <div className="flex justify-center">

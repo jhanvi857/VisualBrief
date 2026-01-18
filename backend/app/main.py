@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers.summarizer import router as summarizer_router
 from app.routers.auth import router as auth_router
-from app.routers.diagram import router as diagram_router
-from app.summaries import router as summaries
+from app.routers.brief_generator import router as brief_generator
+from app.briefs import router as briefs
 from app.user import router as user_info
 import os
 app = FastAPI(title="VisualBrief", version=2.0)
@@ -21,11 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(summarizer_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
-app.include_router(diagram_router, prefix="/api")
-app.include_router(summaries,prefix="/api")
-app.include_router(user_info,prefix="/api")
+app.include_router(brief_generator, prefix="/api")
+app.include_router(briefs, prefix="/api")
+app.include_router(user_info, prefix="/api")
 
 @app.get("/ping")
 def ping():

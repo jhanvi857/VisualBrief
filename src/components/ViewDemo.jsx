@@ -8,11 +8,11 @@ import Footer from "./Footer";
 import { getToken } from "../lib/mockAPI";
 import toast from "react-hot-toast";
 
-const DEMO_CREDITS = 15;
-const LOGGED_IN_CREDITS = 5;
+const DEMO_CREDITS = 5;
+const LOGGED_IN_CREDITS = 10;
 const LOCAL_KEY_CREDITS = "vb_demo_credits";
 const LOCAL_KEY_TIMESTAMP = "vb_demo_timestamp";
-const COOLDOWN_TIME = 1 * 60 * 1000;
+const COOLDOWN_TIME = 1 * 60 * 60 * 1000;
 // const BACKEND_URL = "http://localhost:8000/api";
 const BACKEND_URL = "https://visualbrief.onrender.com/api";
 
@@ -143,7 +143,7 @@ export default function ViewDemo({
 
   const handleSaveAndExit = () => {
     if (onUploadSuccess) {
-      toast.success('Summary saved! Redirecting...');
+      toast.success('Visual Brief saved! Redirecting...');
       setTimeout(onUploadSuccess, 500);
     }
   };

@@ -42,7 +42,7 @@ export default function DashboardTopbar() {
           <Search size={18} className="absolute left-3 top-3 text-gray-500" />
           <input
             type="text"
-            placeholder="Search summaries..."
+            placeholder="Search briefs..."
             className="p-2 rounded-lg border border-gray-700 bg-gray-800 text-gray-200 pl-10 w-full focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>

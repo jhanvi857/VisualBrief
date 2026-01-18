@@ -6,23 +6,23 @@ import { ChevronDown } from "lucide-react"
 
 const faqs = [
   {
-    question: "How accurate are the summaries?",
+    question: "How accurate are the visual briefs?",
     answer:
-      "Our AI model is trained on thousands of documents and achieves 95%+ accuracy in capturing key insights. The accuracy improves with document quality and clarity.",
+      "Our AI model extracts structural logic with extreme precision, mapping relationships and flow with over 95% accuracy for standard documentation.",
   },
   {
     question: "What file formats do you support?",
-    answer: "Currently we support PDF files. We're working on support for Word, PowerPoint, and image formats.",
+    answer: "We support PDF, DOCX, and TXT files. You can also provide raw text inputs directly.",
   },
   {
-    question: "Can I download or export summaries?",
+    question: "Can I download or export my diagrams?",
     answer:
-      "Yes! You can export summaries as PDF, Markdown, or plaintext. Pro and Enterprise plans also support API access for programmatic exports.",
+      "Yes! You can export diagrams as PNG, PDF, or Markdown. Pro plans also support API access for automated workflows.",
   },
   {
     question: "Is my data secure?",
     answer:
-      "Absolutely. All files are encrypted in transit and at rest. We don't store your PDFs after processing, and we're SOC2 Type II compliant.",
+      "Absolutely. All files are encrypted in transit and at rest. We do not use your data for training purposes without explicit consent.",
   },
   {
     question: "Can I use this for my team?",

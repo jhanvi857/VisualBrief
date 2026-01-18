@@ -39,14 +39,14 @@ def get_current_user_id_inline(credentials: HTTPAuthorizationCredentials = Depen
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-@router.get("/summaries")
-def get_summaries(current_user_id: uuid.UUID = Depends(get_current_user_id_inline)):
+@router.get("/briefs")
+def get_briefs(current_user_id: uuid.UUID = Depends(get_current_user_id_inline)):
     try:
         from datetime import datetime
         now = datetime.utcnow().isoformat()
         
         response = (
-            supabase.table("summaries")
+            supabase.table("visual_briefs")
             .select("*")
             .eq("user_id", str(current_user_id))
             .gt("expire_at", now)
@@ -54,42 +54,42 @@ def get_summaries(current_user_id: uuid.UUID = Depends(get_current_user_id_inlin
             .execute()
         )
         
-        summaries_list = response.data
-        return summaries_list
+        briefs_list = response.data
+        return briefs_list
         
     except Exception as err:
-        print("Supabase summaries fetch error.", err)
+        print("Supabase briefs fetch error.", err)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail="Failed to fetch summaries."
+            detail="Failed to fetch visual briefs."
         )
 
-@router.delete("/summaries/{summary_id}")
-def delete_summary(
-    summary_id: uuid.UUID,
+@router.delete("/briefs/{brief_id}")
+def delete_brief(
+    brief_id: uuid.UUID,
     current_user_id: uuid.UUID = Depends(get_current_user_id_inline)
 ):
     try:
         response = (
-            supabase.table("summaries")
+            supabase.table("visual_briefs")
             .delete()
-            .eq("id", str(summary_id))
+            .eq("id", str(brief_id))
             .eq("user_id", str(current_user_id))
             .execute()
         )
         
-        return {"success": True, "message": "Summary deleted successfully"}
+        return {"success": True, "message": "Visual brief deleted successfully"}
         
     except Exception as err:
-        print(f"Supabase delete error for ID {summary_id}.", err)
+        print(f"Supabase delete error for ID {brief_id}.", err)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete summary."
+            detail="Failed to delete visual brief."
         )
 
-@router.get("/summaries/{summary_id}")
-def get_single_summary(
-    summary_id: uuid.UUID, 
+@router.get("/briefs/{brief_id}")
+def get_single_brief(
+    brief_id: uuid.UUID, 
     current_user_id: uuid.UUID = Depends(get_current_user_id_inline)
 ):
     try:
@@ -97,9 +97,9 @@ def get_single_summary(
         now = datetime.utcnow().isoformat()
 
         response = (
-            supabase.table("summaries")
+            supabase.table("visual_briefs")
             .select("*")
-            .eq("id", str(summary_id)) 
+            .eq("id", str(brief_id)) 
             .eq("user_id", str(current_user_id)) 
             .gt("expire_at", now)
             .limit(1)
@@ -109,7 +109,7 @@ def get_single_summary(
         if not response.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Summary not found, expired, or access denied."
+                detail="Visual brief not found, expired, or access denied."
             )
             
         return response.data[0] 
@@ -117,8 +117,8 @@ def get_single_summary(
     except HTTPException:
         raise
     except Exception as err:
-        print(f"Supabase single summary fetch error for ID {summary_id}.", err)
+        print(f"Supabase single brief fetch error for ID {brief_id}.", err)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail="Failed to fetch summary details."
+            detail="Failed to fetch brief details."
         )

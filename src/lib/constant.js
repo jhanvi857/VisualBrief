@@ -1,5 +1,5 @@
 export const APP_NAME = "VisualBrief"
-export const APP_DESCRIPTION = "Convert long PDFs into visual summaries"
+export const APP_DESCRIPTION = "Convert documents into intelligent visual briefs"
 
 export const COLORS = {
   primary: "#6366f1", // indigo-500
@@ -10,23 +10,23 @@ export const COLORS = {
   text: "#f3f4f6", // gray-100
 }
 
-export const SUMMARY_STYLES = [
-  { id: "bullet-points", name: "Bullet Points", icon: "List" },
-  { id: "infographic", name: "Infographic", icon: "BarChart3" },
+export const BRIEF_TYPES = [
+  { id: "flowchart", name: "Flowchart", icon: "GitBranch" },
+  { id: "er-diagram", name: "ER Diagram", icon: "Database" },
   { id: "mind-map", name: "Mind Map", icon: "Network" },
-  { id: "timeline", name: "Timeline", icon: "Clock" },
+  { id: "concept-map", name: "Concept Map", icon: "Link" },
 ]
 
 export const PRICING_PLANS = [
   {
     name: "Starter",
     price: 29,
-    features: ["Up to 50 PDFs/month", "All summary styles", "Email support"],
+    features: ["Up to 50 briefs/month", "All diagram types", "Email support"],
   },
   {
     name: "Pro",
     price: 99,
-    features: ["Unlimited PDFs", "Priority support", "Team collaboration", "API access"],
+    features: ["Unlimited briefs", "Priority support", "Team collaboration", "API access"],
   },
   {
     name: "Enterprise",

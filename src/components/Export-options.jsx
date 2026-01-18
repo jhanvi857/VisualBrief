@@ -6,7 +6,7 @@ export default function ExportOptions({ fileName }) {
   const handleExport = (format) => {
     // Simulate export
     console.log(`Exporting as ${format}`)
-    alert(`Exporting summary as ${format}...`)
+    alert(`Exporting brief as ${format}...`)
   }
 
   return (

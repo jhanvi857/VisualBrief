@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 
-// const API_BASE_URL = "https://visualbrief.onrender.com";
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://visualbrief.onrender.com";
+// const API_BASE_URL = "http://localhost:8000";
 
 export const getToken = async () => {
   const manualToken = localStorage.getItem("access_token");
@@ -27,14 +27,14 @@ export const apiLayer = {
     });
   },
 
-  async getSummaries() {
+  async getBriefs() {
     const userToken = await getToken();
 
     if (!userToken) {
       throw new Error("Authentication required. Token not found.");
     }
 
-    const url = `${API_BASE_URL}/api/summaries`;
+    const url = `${API_BASE_URL}/api/briefs`;
 
     try {
       const response = await fetch(url, {
@@ -50,22 +50,23 @@ export const apiLayer = {
       }
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to fetch summaries.");
+        throw new Error(errorData.detail || "Failed to fetch visual briefs.");
       }
 
       const data = await response.json();
-      const mappedSummaries = data.map((dbSummary) => ({
-        id: dbSummary.id,
-        fileName: dbSummary.file_name,
-        style: dbSummary.summary_type,
-        summary: dbSummary.summary_content,
-        date: new Date(dbSummary.created_at),
-        summaryLength: "N/A",
+      const mappedBriefs = data.map((dbBrief) => ({
+        id: dbBrief.id,
+        fileName: dbBrief.file_name,
+        style: dbBrief.brief_type,
+        brief: dbBrief.brief_content,
+        diagram: dbBrief.diagram_content,
+        date: new Date(dbBrief.created_at),
+        briefLength: "N/A",
       }));
 
-      return mappedSummaries;
+      return mappedBriefs;
     } catch (error) {
-      console.error("Error fetching summaries from backend:", error);
+      console.error("Error fetching briefs from backend:", error);
       throw error;
     }
   },

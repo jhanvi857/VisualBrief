@@ -16,8 +16,8 @@ const features = [
   },
   {
     icon: BarChart3,
-    title: "Multiple Formats",
-    description: "Choose from bullet points, infographics, mind maps, and more.",
+    title: "Visual Formats",
+    description: "Instantly generate Flowcharts, ER Diagrams, Concept Maps, and Mind Maps.",
   },
   {
     icon: Share2,

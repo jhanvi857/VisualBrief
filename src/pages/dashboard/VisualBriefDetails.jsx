@@ -6,10 +6,10 @@ import MermaidRenderer from "../../components/MermaidRenderer"
 const BASE_URL = "https://visualbrief.onrender.com/api";
 const getToken = () => localStorage.getItem('access_token');
 
-export default function SummaryDetail() {
+export default function VisualBriefDetail() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const [summary, setSummary] = useState(null)
+    const [brief, setBrief] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
@@ -21,12 +21,12 @@ export default function SummaryDetail() {
             return;
         }
 
-        const fetchSummary = async () => {
+        const fetchBrief = async () => {
             setLoading(true);
             setError(null);
 
             try {
-                const response = await fetch(`${BASE_URL}/summaries/${id}`, {
+                const response = await fetch(`${BASE_URL}/briefs/${id}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${userToken}`,
@@ -42,7 +42,7 @@ export default function SummaryDetail() {
                 }
 
                 if (response.status === 404) {
-                    setSummary(null);
+                    setBrief(null);
                     setLoading(false);
                     return;
                 }
@@ -52,24 +52,23 @@ export default function SummaryDetail() {
                 }
 
                 const data = await response.json();
-                // console.log("📥 Fetched summary data:", data); // Debug log
-                setSummary(data);
+                setBrief(data);
 
             } catch (err) {
-                console.error("Error fetching summary:", err);
-                setError("Failed to load summary details. Check server connection.");
+                console.error("Error fetching brief:", err);
+                setError("Failed to load brief details. Check server connection.");
             } finally {
                 setLoading(false);
             }
         }
 
-        fetchSummary();
+        fetchBrief();
     }, [id, navigate])
 
-    const getSummaryContent = () => {
-        if (!summary) return { bullets: [], keyQuotes: [], paragraphs: [], text: null };
+    const getBriefContent = () => {
+        if (!brief) return { bullets: [], keyQuotes: [], paragraphs: [], text: null };
 
-        const content = summary.summary_content;
+        const content = brief.brief_content;
 
         if (content && typeof content === 'object') {
             return {
@@ -90,7 +89,6 @@ export default function SummaryDetail() {
                     text: parsed.text || parsed.content || null,
                 };
             } catch (e) {
-                console.log("Treating summary_content as plain text paragraph");
                 return {
                     bullets: [],
                     keyQuotes: [],
@@ -103,7 +101,7 @@ export default function SummaryDetail() {
         return { bullets: [], keyQuotes: [], paragraphs: [], text: null };
     };
 
-    const summaryContent = getSummaryContent();
+    const briefContent = getBriefContent();
 
     if (loading) {
         return (
@@ -112,7 +110,7 @@ export default function SummaryDetail() {
                     <main className="flex-1 p-8 flex items-center justify-center">
                         <div className="text-center">
                             <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4" />
-                            <p className="text-gray-400">Loading summary...</p>
+                            <p className="text-gray-400">Loading visual brief...</p>
                         </div>
                     </main>
                 </div>
@@ -120,14 +118,14 @@ export default function SummaryDetail() {
         )
     }
 
-    if (!summary || error) {
+    if (!brief || error) {
         return (
             <div className="flex h-screen bg-gray-950">
                 <div className="flex-1 flex flex-col">
                     <main className="flex-1 p-8 flex items-center justify-center">
                         <div className="text-center">
                             <FileText size={48} className="mx-auto text-gray-700 mb-4 opacity-50" />
-                            <p className="text-gray-400">{error || "Summary not found or access denied."}</p>
+                            <p className="text-gray-400">{error || "Visual brief not found or access denied."}</p>
                             <button
                                 onClick={() => navigate("/dashboard")}
                                 className="mt-4 text-indigo-400 hover:text-indigo-300 flex items-center justify-center mx-auto transition-colors"
@@ -157,11 +155,11 @@ export default function SummaryDetail() {
                                 </button>
                                 <div>
                                     <h1 className="text-3xl font-bold">
-                                        {summary.file_name || "Untitled Summary"}
+                                        {brief.file_name || "Untitled Brief"}
                                     </h1>
                                     <p className="text-gray-400">
-                                        {summary.created_at
-                                            ? new Date(summary.created_at).toLocaleDateString()
+                                        {brief.created_at
+                                            ? new Date(brief.created_at).toLocaleDateString()
                                             : "Date unknown"
                                         }
                                     </p>
@@ -204,14 +202,14 @@ export default function SummaryDetail() {
                                 <div className="bg-gray-800 p-4 rounded-xl">
                                     <p className="text-gray-400 text-sm mb-1">File</p>
                                     <p className="font-bold truncate text-gray-200">
-                                        {summary.file_name || "N/A"}
+                                        {brief.file_name || "N/A"}
                                     </p>
                                 </div>
                                 <div className="bg-gray-800 p-4 rounded-xl">
-                                    <p className="text-gray-400 text-sm mb-1">Summary Type</p>
+                                    <p className="text-gray-400 text-sm mb-1">Brief Type</p>
                                     <p className="font-bold capitalize text-gray-200">
-                                        {summary.summary_type
-                                            ? summary.summary_type.replace(/[-_]/g, " ")
+                                        {brief.brief_type
+                                            ? brief.brief_type.replace(/[-_]/g, " ")
                                             : "Standard"
                                         }
                                     </p>
@@ -219,8 +217,8 @@ export default function SummaryDetail() {
                                 <div className="bg-gray-800 p-4 rounded-xl">
                                     <p className="text-gray-400 text-sm mb-1">Created</p>
                                     <p className="font-bold text-gray-200">
-                                        {summary.created_at
-                                            ? new Date(summary.created_at).toLocaleDateString()
+                                        {brief.created_at
+                                            ? new Date(brief.created_at).toLocaleDateString()
                                             : "N/A"
                                         }
                                     </p>
@@ -228,32 +226,32 @@ export default function SummaryDetail() {
                             </div>
 
                             {/* Diagram Section */}
-                            {summary.diagram_content?.mermaid && (
+                            {brief.diagram_content?.mermaid && (
                                 <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
-                                    <h2 className="text-xl font-bold mb-4 text-white">Visual Brief</h2>
+                                    <h2 className="text-xl font-bold mb-4 text-white">Visual Flow</h2>
                                     <div className="bg-white rounded-lg p-4 overflow-hidden">
-                                        <MermaidRenderer chart={summary.diagram_content.mermaid} />
+                                        <MermaidRenderer chart={brief.diagram_content.mermaid} />
                                     </div>
                                 </div>
                             )}
 
-                            {/* Summary Content Section. Handles Multiple Formats */}
+                            {/* Brief Content Section. Handles Multiple Formats */}
                             <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
-                                <h2 className="text-xl font-bold mb-4 text-white">Summary</h2>
+                                <h2 className="text-xl font-bold mb-4 text-white">Logic & Details</h2>
 
                                 {/* plain test-para */}
-                                {summaryContent.text && (
+                                {briefContent.text && (
                                     <div className="prose prose-invert max-w-none">
                                         <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                            {summaryContent.text}
+                                            {briefContent.text}
                                         </p>
                                     </div>
                                 )}
 
                                 {/* para arr. */}
-                                {summaryContent.paragraphs.length > 0 && (
+                                {briefContent.paragraphs.length > 0 && (
                                     <div className="space-y-4">
-                                        {summaryContent.paragraphs.map((para, idx) => (
+                                        {briefContent.paragraphs.map((para, idx) => (
                                             <p key={idx} className="text-gray-300 leading-relaxed">
                                                 {para}
                                             </p>
@@ -262,11 +260,11 @@ export default function SummaryDetail() {
                                 )}
 
                                 {/* bullet points.*/}
-                                {summaryContent.bullets.length > 0 && (
+                                {briefContent.bullets.length > 0 && (
                                     <div>
-                                        <h3 className="text-lg font-semibold mb-3 text-white">Key Points</h3>
+                                        <h3 className="text-lg font-semibold mb-3 text-white">Key Insights</h3>
                                         <ul className="space-y-3">
-                                            {summaryContent.bullets.map((bullet, idx) => (
+                                            {briefContent.bullets.map((bullet, idx) => (
                                                 <li key={idx} className="flex gap-3">
                                                     <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 shrink-0" />
                                                     <span className="text-gray-300">{bullet}</span>
@@ -277,18 +275,18 @@ export default function SummaryDetail() {
                                 )}
 
                                 {/* fallback*/}
-                                {!summaryContent.text &&
-                                    summaryContent.bullets.length === 0 &&
-                                    summaryContent.paragraphs.length === 0 && (
-                                        <p className="text-gray-400 italic">No summary content available.</p>
+                                {!briefContent.text &&
+                                    briefContent.bullets.length === 0 &&
+                                    briefContent.paragraphs.length === 0 && (
+                                        <p className="text-gray-400 italic">No additional content available.</p>
                                     )}
                             </div>
                             {/* quotes */}
-                            {summaryContent.keyQuotes.length > 0 && (
+                            {briefContent.keyQuotes.length > 0 && (
                                 <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
                                     <h2 className="text-xl font-bold mb-4 text-white">Key Quotes</h2>
                                     <div className="space-y-4">
-                                        {summaryContent.keyQuotes.map((quote, idx) => (
+                                        {briefContent.keyQuotes.map((quote, idx) => (
                                             <div
                                                 key={idx}
                                                 className="pl-4 border-l-4 border-indigo-500"

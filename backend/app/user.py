@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 import uuid
 from pydantic import BaseModel, EmailStr
-from app.summaries import get_current_user_id_inline
+from app.briefs import get_current_user_id_inline
 from app.supabase_client import supabase
 
 router = APIRouter()
@@ -91,7 +91,7 @@ def update_user_profile(
 @router.delete("/user/account")
 def delete_user_account(current_user_id: uuid.UUID = Depends(get_current_user_id_inline)):
     try:
-        supabase.table("summaries").delete().eq("user_id", str(current_user_id)).execute()
+        supabase.table("visual_briefs").delete().eq("user_id", str(current_user_id)).execute()
         
         response = (
             supabase.table("users")
