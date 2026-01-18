@@ -1,55 +1,39 @@
-import spacy
 import re
-from typing import List, Set, Dict
+from typing import List, Dict, Set, Any
 
-# Load spaCy model
-nlp = spacy.load("en_core_web_sm")
+def normalize_label(text: str) -> str:
+    # removing extra whitespace, quotes, and common stop words.
+    if not text:
+        return ""
+    # quotes
+    text = text.strip().strip('"').strip("'").strip()
+    # Normalizeing whitespace
+    text = re.sub(r'\s+', ' ', text)
 
-def normalize_entity(name: str) -> str:
-    name = name.strip().lower()
-    name = re.sub(r'^(the|a|an|of|s)\s+', '', name)
-    name = re.sub(r'\s+(the|a|an|of|s)$', '', name)
-    name = re.sub(r'[.,;:`\'"]', '', name)
-    return name.strip()
+    if len(text) > 1:
+        text = text[0].upper() + text[1:]
+    return text
 
-def consolidate_entities(entities: List[str]) -> Dict[str, str]:
-    if not entities:
-        return {}
+def consolidate_nodes(nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     
-    consolidation_map = {}
-    sorted_entities = sorted(list(set(entities)), key=len, reverse=True)
-    
-    for entity in sorted_entities:
-        norm = normalize_entity(entity)
-        if norm and norm not in consolidation_map:
-            consolidation_map[norm] = entity
+    if not nodes:
+        return []
+    # Map of normalized name -> canonical node
+    canonical_map = {}
+    # ID mapping to cannonical nodes.
+    id_mapping = {}
+
+    for node in nodes:
+        original_label = node["label"]
+        norm_label = original_label.lower().strip()
+        # plural->singular. and vice versa.
+        if norm_label.endswith('s') and len(norm_label) > 3:
+            norm_label = norm_label[:-1]
             
-    final_map = {}
-    for entity in entities:
-        norm = normalize_entity(entity)
-        best_match = consolidation_map.get(norm, entity)
-        for n_key, master in consolidation_map.items():
-            if norm != n_key and (norm in n_key or n_key in norm):
-                if len(master) > len(best_match) or best_match == entity:
-                    best_match = master
-        final_map[entity] = best_match
-    return final_map
+        if norm_label in canonical_map:
+            id_mapping[node["id"]] = canonical_map[norm_label]["id"]
+        else:
+            canonical_map[norm_label] = node
+            id_mapping[node["id"]] = node["id"]
 
-def extract_raw_entities(text: str):
-    doc = nlp(text)
-    raw_entities = set()
-    noun_chunk_map = {}
-
-    for chunk in doc.noun_chunks:
-        name = chunk.text.strip().replace("\n", " ")
-        if chunk.root.pos_ in ["PROPN", "NOUN"] and name:
-            raw_entities.add(name)
-            noun_chunk_map[chunk.root] = name
-
-    for ent in doc.ents:
-        name = ent.text.strip().replace("\n"," ")
-        raw_entities.add(name)
-        if ent.root not in noun_chunk_map:
-            noun_chunk_map[ent.root] = name
-
-    return doc, raw_entities, noun_chunk_map
+    return list(canonical_map.values()), id_mapping

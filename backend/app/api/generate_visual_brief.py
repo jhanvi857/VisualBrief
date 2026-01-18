@@ -21,8 +21,7 @@ def generate_visual_brief(text: str, diagram_type: str = "flowchart") -> Dict[st
             "suggested_type": result.get("suggested_type"),
             "confidence": result.get("confidence", 0.0)
         }
-
-        schema = DiagramSchema(
+    schema = DiagramSchema(
         type=diagram_type,
         nodes=[Node(**n) for n in result["nodes"]],
         edges=[Edge(**e) for e in result["edges"]],

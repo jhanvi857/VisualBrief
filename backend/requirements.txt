@@ -13,3 +13,4 @@ pdfplumber
 python-docx
 networkx
 pytextrank
+google-generativeai

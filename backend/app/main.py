@@ -2,10 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.summarizer import router as summarizer_router
 from app.routers.auth import router as auth_router
+from app.routers.diagram import router as diagram_router
 from app.summaries import router as summaries
 from app.user import router as user_info
 import os
-app = FastAPI(title="DocSummarizer",version=1.0)
+app = FastAPI(title="VisualBrief", version=2.0)
 
 origins = [
     "http://localhost:5173",
@@ -22,6 +23,7 @@ app.add_middleware(
 
 app.include_router(summarizer_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
+app.include_router(diagram_router, prefix="/api")
 app.include_router(summaries,prefix="/api")
 app.include_router(user_info,prefix="/api")
 

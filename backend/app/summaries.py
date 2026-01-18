@@ -42,10 +42,14 @@ def get_current_user_id_inline(credentials: HTTPAuthorizationCredentials = Depen
 @router.get("/summaries")
 def get_summaries(current_user_id: uuid.UUID = Depends(get_current_user_id_inline)):
     try:
+        from datetime import datetime
+        now = datetime.utcnow().isoformat()
+        
         response = (
             supabase.table("summaries")
             .select("*")
-            .eq("user_id", str(current_user_id)) 
+            .eq("user_id", str(current_user_id))
+            .gt("expire_at", now)
             .order("created_at", desc=True)
             .execute()
         )
@@ -60,18 +64,44 @@ def get_summaries(current_user_id: uuid.UUID = Depends(get_current_user_id_inlin
             detail="Failed to fetch summaries."
         )
 
+@router.delete("/summaries/{summary_id}")
+def delete_summary(
+    summary_id: uuid.UUID,
+    current_user_id: uuid.UUID = Depends(get_current_user_id_inline)
+):
+    try:
+        response = (
+            supabase.table("summaries")
+            .delete()
+            .eq("id", str(summary_id))
+            .eq("user_id", str(current_user_id))
+            .execute()
+        )
+        
+        return {"success": True, "message": "Summary deleted successfully"}
+        
+    except Exception as err:
+        print(f"Supabase delete error for ID {summary_id}.", err)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete summary."
+        )
+
 @router.get("/summaries/{summary_id}")
 def get_single_summary(
     summary_id: uuid.UUID, 
     current_user_id: uuid.UUID = Depends(get_current_user_id_inline)
 ):
-    
     try:
+        from datetime import datetime
+        now = datetime.utcnow().isoformat()
+
         response = (
             supabase.table("summaries")
             .select("*")
             .eq("id", str(summary_id)) 
             .eq("user_id", str(current_user_id)) 
+            .gt("expire_at", now)
             .limit(1)
             .execute()
         )
@@ -79,7 +109,7 @@ def get_single_summary(
         if not response.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Summary not found or access denied."
+                detail="Summary not found, expired, or access denied."
             )
             
         return response.data[0] 
