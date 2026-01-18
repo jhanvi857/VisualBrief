@@ -10,6 +10,7 @@ from app.summaries import get_current_user_id_inline
 from app.supabase_client import supabase
 import pdfplumber
 import docx
+from app.services.llm_service import llm_service
 
 router = APIRouter()
 security = HTTPBearer()
@@ -52,11 +53,32 @@ async def upload_file(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        from app.nlp.router import route_nlp
+        from app.nlp.diagram_schema import DiagramSchema, Node, Edge, DiagramMeta
+        from app.nlp.mermaid_adapter import to_mermaid
+        from app.renderers.step_renderer import render_steps
+        from app.renderers.logic_renderer import render_logic
+
         text = extract_text(file_path)
-        visual_brief = generate_visual_brief(text, diagramType)
+        arrow_format = llm_service.normalize_to_arrow_format(text, diagramType)
+        if not arrow_format:
+            raise Exception("LLM normalization failed")
+            
+        nlp_result = route_nlp(arrow_format, diagramType)
         
-        if not visual_brief.get("success", True):
-            return visual_brief
+        if nlp_result.get("success") is False:
+             return nlp_result
+
+        schema = DiagramSchema(
+            type=diagramType,
+            nodes=[Node(**n) for n in nlp_result["nodes"]],
+            edges=[Edge(**e) for e in nlp_result["edges"]],
+            metadata=DiagramMeta(**nlp_result["metadata"])
+        )
+        
+        mermaid_code = to_mermaid(schema)
+        steps = render_steps(schema)
+        logic = render_logic(schema)
 
         new_brief_id = str(uuid.uuid4())
         insert_data = {
@@ -64,8 +86,13 @@ async def upload_file(
             "user_id": str(current_user_id),
             "file_name": file.filename,
             "summary_type": diagramType,
-            "summary_content": visual_brief.get("logic", []),
-            "diagram_content": visual_brief,
+            "summary_content": logic, 
+            "diagram_content": {
+                "mermaid": mermaid_code,
+                "schema": schema.dict(),
+                "steps": steps,
+                "metadata": nlp_result["metadata"]
+            },
         }
         
         response = supabase.table("summaries").insert(insert_data).execute()
@@ -78,7 +105,10 @@ async def upload_file(
 
         return {
             "briefId": new_brief_id,
-            **visual_brief
+            "mermaid": mermaid_code,
+            "steps": steps,
+            "logic": logic,
+            "success": True
         }
 
     except HTTPException:

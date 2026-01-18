@@ -1,0 +1,8 @@
+University Database System:
+- A Department has many Professors.
+- A Professor belongs to one Department.
+- A Professor teaches multiple Courses.
+- A Student enrolls in many Courses.
+- A Course can have many Students enrolled.
+- Each Course is managed by one Department.
+- A Student has one Advisor who is a Professor.

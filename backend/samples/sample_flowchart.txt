@@ -1,0 +1,7 @@
+Order Placement Process:
+The user starts by browsing the catalog.
+If they find an item, they add it to the cart.
+Then they proceed to checkout.
+If the payment is successful, the order is confirmed and the process ends.
+If the payment fails, they are asked to retry the payment.
+If they decide not to retry, the order is cancelled and the process ends.
