@@ -9,6 +9,7 @@ class NodeMeta(BaseModel):
 class Node(BaseModel):
     id: str
     label: str
+    type: Optional[str] = "process"
     meta: Optional[NodeMeta] = None
 
 class EdgeMeta(BaseModel):
