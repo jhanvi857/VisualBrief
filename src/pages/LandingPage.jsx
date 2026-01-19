@@ -12,8 +12,8 @@ export default function LandingPage() {
       <Navbar />
       <Hero />
       <Features />
-      <Testimonials />
-      <Pricing />
+      {/* <Testimonials /> */}
+      {/* <Pricing /> */}
       <FAQ />
       <Footer />
     </div>

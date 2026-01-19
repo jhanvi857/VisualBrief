@@ -94,18 +94,18 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8">
-          <Link
-            to="/#features"
+          <a
+            href="/#features"
             className="text-gray-300 hover:text-indigo-400 transition-smooth"
           >
             Features
-          </Link>
-          <Link
-            to="/#pricing"
+          </a>
+          {/* <a
+            href="/#pricing"
             className="text-gray-300 hover:text-indigo-400 transition-smooth"
           >
             Pricing
-          </Link>
+          </a> */}
           <Link
             to="/blog"
             className="text-gray-300 hover:text-indigo-400 transition-smooth"
