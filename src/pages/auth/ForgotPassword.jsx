@@ -20,7 +20,7 @@ export default function ForgotPassword() {
     try {
       setLoading(true)
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password` 
+        redirectTo: `${window.location.origin}/reset-password`
       })
 
       if (error) throw error
@@ -28,8 +28,18 @@ export default function ForgotPassword() {
       setSubmitted(true)
       toast.success(`Reset email sent to ${email}`)
     } catch (err) {
-      console.error(err)
-      toast.error(err.message || "Failed to send reset email")
+      // Handle rate limiting specifically
+      const isRateLimit = err.code === 429 || err.status === 429 || err.message?.toLowerCase().includes('rate limit');
+
+      if (isRateLimit) {
+        // Suppress console error for expected rate limits, just show toast
+        console.warn("Rate limit hit, waiting for cooldown.")
+        toast.error("Too many requests. Please wait 60 seconds before trying again.")
+      } else {
+        // Log genuine errors
+        console.error("Reset password error:", err)
+        toast.error(err.message || "Failed to send reset email")
+      }
     } finally {
       setLoading(false)
     }

@@ -71,14 +71,14 @@ def signup(body: Signup):
     if existing_user.data:
         error_response("USER_ALREADY_EXISTS", "User with this email already exists")
 
-    auth_response = supabase.auth.sign_up(
-        {"email": body.email, "password": body.password}
-    )
+    try:
+        auth_response = supabase.auth.sign_up(
+            {"email": body.email, "password": body.password}
+        )
+        user = auth_response.user
+    except Exception as e:
+        error_response("SUPABASE_AUTH_ERROR", str(e))
 
-    if auth_response.error:
-        error_response("SUPABASE_AUTH_ERROR", auth_response.error.message)
-
-    user = auth_response.user
     if not user:
         error_response("SERVER_ERROR", "Failed to create user in Supabase Auth", 500)
 

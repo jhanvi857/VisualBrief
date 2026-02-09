@@ -6,12 +6,10 @@ import "./App.css"
 import { Toaster } from "react-hot-toast"
 import { AuthProvider } from "./pages/auth/AuthContext"
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AuthProvider>
+  <AuthProvider>
     <Router>
       <App />
       <Toaster position="top-center" />
     </Router>
-    </AuthProvider>
-  </React.StrictMode>,
+  </AuthProvider>
 )

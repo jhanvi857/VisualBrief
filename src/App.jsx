@@ -5,6 +5,7 @@ import LandingPage from "./pages/LandingPage"
 import SignUp from "./pages/auth/SignUp"
 import Login from "./pages/auth/Login"
 import ForgotPassword from "./pages/auth/ForgotPassword"
+import ResetPassword from "./pages/auth/ResetPassword"
 import Dashboard from "./pages/dashboard/DashBoard"
 import UploadPage from "./pages/dashboard/UploadPage"
 import VisualBriefDetail from "./pages/dashboard/VisualBriefDetails"
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/visual-brief/:id" element={<VisualBriefDetail />} />

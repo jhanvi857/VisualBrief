@@ -29,6 +29,10 @@ app.include_router(user_info, prefix="/api")
 def ping():
     return {"message": "pong"}
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "message": "Service is healthy"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
