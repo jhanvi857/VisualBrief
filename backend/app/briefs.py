@@ -8,39 +8,10 @@ from app.supabase_client import supabase
 router = APIRouter()
 security = HTTPBearer()
 
-def get_current_user_id_inline(credentials: HTTPAuthorizationCredentials = Depends(security)) -> uuid.UUID:
-    token = credentials.credentials
-    
-    try:
-        payload = decode_access_token(token) 
-        
-        if payload is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token is invalid or expired.",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-            
-        user_id_str: str = payload.get("user_id")
-        
-        if user_id_str is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: User ID not found.",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-            
-        return uuid.UUID(user_id_str)
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication failed.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+from app.utils.auth_dependency import get_current_user_id
 
 @router.get("/briefs")
-def get_briefs(current_user_id: uuid.UUID = Depends(get_current_user_id_inline)):
+def get_briefs(current_user_id: uuid.UUID = Depends(get_current_user_id)):
     try:
         from datetime import datetime
         now = datetime.utcnow().isoformat()
@@ -67,7 +38,7 @@ def get_briefs(current_user_id: uuid.UUID = Depends(get_current_user_id_inline))
 @router.delete("/briefs/{brief_id}")
 def delete_brief(
     brief_id: uuid.UUID,
-    current_user_id: uuid.UUID = Depends(get_current_user_id_inline)
+    current_user_id: uuid.UUID = Depends(get_current_user_id)
 ):
     try:
         response = (
@@ -90,7 +61,7 @@ def delete_brief(
 @router.get("/briefs/{brief_id}")
 def get_single_brief(
     brief_id: uuid.UUID, 
-    current_user_id: uuid.UUID = Depends(get_current_user_id_inline)
+    current_user_id: uuid.UUID = Depends(get_current_user_id)
 ):
     try:
         from datetime import datetime

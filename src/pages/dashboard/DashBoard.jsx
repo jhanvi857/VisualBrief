@@ -33,8 +33,8 @@ export default function Dashboard() {
 
     try {
       const userToken = await getToken();
-      // const response = await fetch(`http://localhost:8000/api/briefs/${id}`, {
-      const response = await fetch(`https://visualbrief.onrender.com/api/briefs/${id}`, {
+      // const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/briefs/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/briefs/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${userToken}`,

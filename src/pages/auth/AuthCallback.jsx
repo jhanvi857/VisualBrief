@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import toast from "react-hot-toast";
 
-const API_BASE_URL = "https://visualbrief.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // const API_BASE_URL = "http://localhost:8000";
 
 export default function AuthCallback() {
@@ -12,25 +12,23 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // ✅ Get the current session (v2 SDK)
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error || !session) throw new Error("Authentication failed");
 
         const user = session.user;
-        const email = user.email;
-        const name = user.user_metadata?.full_name || email;
 
-        const res = await fetch(`${API_BASE_URL}/api/google-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, name }),
-        });
+        const { error: dbError } = await supabase
+          .from("users")
+          .upsert({
+            id: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || user.email,
+            role: "free",
+          }, { onConflict: 'id', ignoreDuplicates: true });
 
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.detail || "Backend login failed");
-
-        localStorage.setItem("access_token", result.access_token);
-        localStorage.setItem("vb_user", JSON.stringify(result.user));
+        if (dbError) {
+          console.error("Profile creation error", dbError);
+        }
 
         toast.success("Logged in successfully!");
         navigate("/dashboard");

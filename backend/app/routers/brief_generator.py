@@ -1,7 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
 from app.services.llm_service import llm_service
+from app.utils.auth_dependency import get_optional_current_user_id
+import uuid
 from app.nlp.router import route_nlp
 from app.nlp.mermaid_adapter import to_mermaid
 from app.schema.diagram_schema import DiagramSchema
@@ -16,22 +17,11 @@ async def generate_diagram(
     text: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     diagram_type: str = Form(...),
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
+    current_user_id: Optional[uuid.UUID] = Depends(get_optional_current_user_id)
 ):
-    from app.briefs import decode_access_token
-    import uuid
     from app.supabase_client import supabase
     from app.renderers.logic_renderer import render_logic
     from app.renderers.step_renderer import render_steps
-    
-    current_user_id = None
-    if credentials:
-        try:
-            payload = decode_access_token(credentials.credentials)
-            if payload:
-                current_user_id = payload.get("user_id")
-        except:
-            pass
 
     input_text = ""
     file_name = "Custom Text"
@@ -71,7 +61,7 @@ async def generate_diagram(
         result_dict["logic"] = logic
     except Exception as e:
         logger.error(f"Error converting to visual format: {e}")
-        # We still return the result_dict but without mermaid if it failed
+        # still return the result_dict but without mermaid if it failed
         result_dict["mermaid"] = None
         result_dict["success"] = False
         result_dict["detail"] = f"Visual conversion error: {str(e)}"

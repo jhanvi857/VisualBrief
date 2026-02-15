@@ -10,12 +10,22 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
+      if (data.session?.access_token) {
+        localStorage.setItem("access_token", data.session.access_token);
+      } else {
+        localStorage.removeItem("access_token");
+      }
       setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
+        if (session?.access_token) {
+          localStorage.setItem("access_token", session.access_token);
+        } else {
+          localStorage.removeItem("access_token");
+        }
       }
     );
 

@@ -15,6 +15,7 @@ export default function SignUp() {
     password: "",
     confirmPassword: "",
   });
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,32 +36,42 @@ export default function SignUp() {
     }
 
     try {
-      const res = await fetch("https://visualbrief.onrender.com/api/signup", {
-        // const res = await fetch("http://localhost:8000/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: { full_name: formData.name },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
-      const data = await res.json();
+      if (error) throw error;
 
-      if (!res.ok) {
-        toast.error(data?.detail?.message || "Signup failed");
-        return;
+      if (data.user && data.session) {
+        // User is auto-confirmed or confirmation disabled
+        // Create public user record
+        const { error: dbError } = await supabase
+          .from("users")
+          .upsert({
+            id: data.user.id,
+            email: formData.email,
+            name: formData.name,
+            role: "free",
+            credits: 5,
+          }, { onConflict: 'id', ignoreDuplicates: true });
+
+        if (dbError) console.warn("DB Insert warning:", dbError);
+
+        toast.success("Signup successful!");
+        navigate("/dashboard");
+      } else if (data.user && !data.session) {
+        // Confirmation email sent
+        setSubmitted(true);
+        toast.success("Please check your email to confirm your account.");
       }
-
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("vb_user", JSON.stringify(data.user));
-
-      toast.success("Signup successful!");
-      navigate("/dashboard");
     } catch (err) {
-      toast.error("Signup failed. Try again.");
       console.error(err);
+      toast.error(err.message || "Signup failed. Try again.");
     }
   };
 
@@ -75,6 +86,27 @@ export default function SignUp() {
       toast.error("Google authentication failed");
     }
   };
+
+  if (submitted) {
+    return (
+      <AuthLayout title="Check Your Email" subtitle={`We sent a confirmation link to ${formData.email}`}>
+        <div className="text-center space-y-6">
+          <div className="bg-indigo-500/10 p-4 rounded-lg border border-indigo-500/20">
+            <p className="text-gray-300">
+              Click the link in the email to activate your account.
+              If you don't see it, check your spam folder.
+            </p>
+          </div>
+          <button
+            onClick={() => setSubmitted(false)}
+            className="text-indigo-400 hover:text-indigo-300 font-medium"
+          >
+            Back to Sign Up
+          </button>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <>

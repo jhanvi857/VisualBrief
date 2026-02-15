@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Download, RefreshCw, Edit2, Share2, ArrowLeft, FileText } from "lucide-react"
 import MermaidRenderer from "../../components/MermaidRenderer"
 // const BASE_URL = "http://localhost:8000/api";
-const BASE_URL = "https://visualbrief.onrender.com/api";
+const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 const getToken = () => localStorage.getItem('access_token');
 
 export default function VisualBriefDetail() {

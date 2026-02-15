@@ -6,7 +6,7 @@ import { Save, Trash2, Users, Lock, CreditCard, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 
 // const API_BASE_URL = "http://localhost:8000/api";
-const API_BASE_URL = "https://visualbrief.onrender.com/api";
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 
 const settingsTabs = [
   { id: "profile", label: "Profile", icon: Lock },
@@ -178,8 +178,8 @@ export default function Settings() {
             {message && (
               <div
                 className={`mb-6 p-4 rounded-lg ${message.type === "success"
-                    ? "bg-green-500/10 border border-green-500/30 text-green-400"
-                    : "bg-red-500/10 border border-red-500/30 text-red-400"
+                  ? "bg-green-500/10 border border-green-500/30 text-green-400"
+                  : "bg-red-500/10 border border-red-500/30 text-red-400"
                   }`}
               >
                 {message.text}
@@ -195,8 +195,8 @@ export default function Settings() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${activeTab === tab.id
-                        ? "border-indigo-500 text-indigo-400"
-                        : "border-transparent text-gray-400 hover:text-gray-300"
+                      ? "border-indigo-500 text-indigo-400"
+                      : "border-transparent text-gray-400 hover:text-gray-300"
                       }`}
                   >
                     <Icon size={18} />

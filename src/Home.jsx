@@ -12,7 +12,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("diagram");
 
-  const BACKEND_URL = "https://visualbrief.onrender.com/api";
+  const BACKEND_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 
   const handleFileUpload = (file) => setUploadedFile(file);
   const handleGenerateBrief = async () => {

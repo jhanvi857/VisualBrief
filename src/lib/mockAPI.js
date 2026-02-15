@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 
-const API_BASE_URL = "https://visualbrief.onrender.com";
-// const API_BASE_URL = "http://localhost:8000";
+// constant API_BASE_URL = "https://visualbrief.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const getToken = async () => {
   const manualToken = localStorage.getItem("access_token");

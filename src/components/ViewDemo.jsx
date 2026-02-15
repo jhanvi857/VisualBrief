@@ -14,7 +14,7 @@ const LOCAL_KEY_CREDITS = "vb_demo_credits";
 const LOCAL_KEY_TIMESTAMP = "vb_demo_timestamp";
 const COOLDOWN_TIME = 1 * 60 * 60 * 1000;
 // const BACKEND_URL = "http://localhost:8000/api";
-const BACKEND_URL = "https://visualbrief.onrender.com/api";
+const BACKEND_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 
 function formatCooldown(ms) {
   const totalSec = Math.floor(ms / 1000);

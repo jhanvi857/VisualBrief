@@ -1,8 +1,9 @@
 import { Search, Bell, Settings, LogOut } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { supabase } from "../lib/supabaseClient";
 // const API_BASE_URL = "http://localhost:8000"
-const API_BASE_URL = "https://visualbrief.onrender.com"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function DashboardTopbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -12,16 +13,8 @@ export default function DashboardTopbar() {
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("access_token")
-      if (token) {
-        await fetch(`${API_BASE_URL}/api/logout`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-        }).catch(err => console.warn("Backend logout failed:", err))
-      }
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error) {
       console.error("Logout error:", error)
     } finally {

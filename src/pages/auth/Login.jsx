@@ -24,29 +24,18 @@ export default function Login() {
     }
 
     try {
-      const res = await fetch("https://visualbrief.onrender.com/api/login", {
-        // const res = await fetch("http://localhost:8000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await res.json();
+      if (error) throw error;
 
-      if (!res.ok) {
-        toast.error(data?.detail?.message || "Login failed");
-        return;
-      }
-
-      localStorage.setItem("access_token", data.access_token);
       toast.success("Login successful!");
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      toast.error("Login failed. Try again.");
+      toast.error(err.message || "Login failed. Try again.");
     }
   };
   const handleGoogleAuth = async () => {
@@ -108,12 +97,12 @@ export default function Login() {
               />
               <span className="text-gray-400">Remember me</span>
             </label>
-            <Link
+            {/* <Link
               to="/forgot-password"
               className="text-indigo-400 hover:text-indigo-300"
             >
               Forgot password?
-            </Link>
+            </Link> */}
           </div>
 
           <button
