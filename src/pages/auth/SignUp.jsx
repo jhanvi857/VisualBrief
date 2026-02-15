@@ -50,17 +50,11 @@ export default function SignUp() {
       if (data.user && data.session) {
         // User is auto-confirmed or confirmation disabled
         // Create public user record
-        const { error: dbError } = await supabase
-          .from("users")
-          .upsert({
-            id: data.user.id,
-            email: formData.email,
-            name: formData.name,
-            role: "free",
-            credits: 5,
-          }, { onConflict: 'id', ignoreDuplicates: true });
-
-        if (dbError) console.warn("DB Insert warning:", dbError);
+        // User is auto-confirmed or confirmation disabled
+        // We do NOT manually insert into public.users here anymore.
+        // The backend handles sync when we first access the profile.
+        // OR we can do it, but we must handle collisions.
+        // Best practice: Let the backend handle it on first API call or use a Trigger.
 
         toast.success("Signup successful!");
         navigate("/dashboard");

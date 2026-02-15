@@ -72,7 +72,7 @@ async def generate_diagram(
         new_id = str(uuid.uuid4())
         insert_data = {
             "id": new_id,
-            "user_id": current_user_id,
+            "user_id": str(current_user_id),
             "file_name": file_name,
             "brief_type": diagram_type,
             "brief_content": logic,

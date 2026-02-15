@@ -29,6 +29,17 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/upload" element={<UploadPage />} />
+        <Route path="/visual-brief/:id" element={<VisualBriefDetail />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/viewDemo" element={<ViewDemo />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/upload-home" element={<Home />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
       </Routes>
       {/* </div> */}

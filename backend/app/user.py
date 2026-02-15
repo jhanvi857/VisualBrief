@@ -40,13 +40,24 @@ def get_user_profile(
                 name = meta.get("full_name", email.split("@")[0] if email else "User")
                 
                 # Attempt to insert/upsert
-                upsert_res = client.table("users").upsert({
-                    "id": str(current_user_id),
-                    "email": email,
-                    "name": name,
-                    "role": "free",
-                    "credits": 5
-                }, on_conflict="id", ignore_duplicates=True).execute()
+                try:
+                    upsert_res = client.table("users").upsert({
+                        "id": str(current_user_id),
+                        "email": email,
+                        "name": name,
+                        "role": "free",
+                        "credits": 5
+                    }, on_conflict="id", ignore_duplicates=True).execute()
+                except Exception as e:
+                    # Check for email collision with different ID
+                    if "duplicate key value violates unique constraint" in str(e) and "email" in str(e):
+                        try:
+                            print(f"Collision detected for email {email}. Manual cleanup required.")
+                            pass 
+                        except:
+                            pass
+                    else:
+                        raise e
 
                 # Retry fetch
                 response = (
