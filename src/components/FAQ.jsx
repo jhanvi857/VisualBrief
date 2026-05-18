@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 
 const faqs = [
@@ -42,30 +41,20 @@ export default function FAQ() {
   return (
     <section className="py-20 px-4 bg-gray-950">
       <div className="max-w-3xl mx-auto">
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Frequently Asked Questions</h2>
           <p className="text-xl text-gray-400">Find answers to common questions</p>
-        </motion.div>
+        </div>
 
         <div className="space-y-3">
           {faqs.map((faq, idx) => (
-            <motion.div
+            <div
               key={idx}
               className="border border-gray-800 rounded-lg overflow-hidden"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: idx * 0.05 }}
-              viewport={{ once: true }}
             >
               <button
-                onClick={() => setOpenIdx(openIdx === idx ? -1 : idx)}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-800/50 transition-smooth"
+                onClick={() => setOpenIdx((prev) => (prev === idx ? -1 : idx))}
+                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
               >
                 <span className="text-left font-medium">{faq.question}</span>
                 <ChevronDown
@@ -74,18 +63,19 @@ export default function FAQ() {
                 />
               </button>
 
-              {openIdx === idx && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="px-6 py-4 bg-gray-800/30 border-t border-gray-800 text-gray-400"
-                >
-                  {faq.answer}
-                </motion.div>
-              )}
-            </motion.div>
+              {/* CSS-driven collapse for smoother transitions */}
+              <div
+                className="px-6 bg-gray-800/30 border-t border-gray-800 text-gray-400"
+                style={{
+                  maxHeight: openIdx === idx ? "500px" : "0px",
+                  opacity: openIdx === idx ? 1 : 0,
+                  overflow: "hidden",
+                  transition: "max-height 220ms ease, opacity 180ms ease",
+                }}
+              >
+                <div className="py-4">{faq.answer}</div>
+              </div>
+            </div>
           ))}
         </div>
       </div>

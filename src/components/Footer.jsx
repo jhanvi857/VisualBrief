@@ -105,7 +105,7 @@ export default function Footer() {
             <h4 className="font-bold mb-4">Stay Updated</h4>
             <p className="text-sm text-gray-400 mb-4">Get the latest updates on new features.</p>
             <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder="Enter email" className="input-field flex-1 text-sm" />
+              <input type="email" placeholder="Enter email" className="input-field flex-1 text-sm border border-white rounded-lg p-2" />
               <button className="btn-primary p-2">
                 <Mail size={18} />
               </button>
